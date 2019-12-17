@@ -2,13 +2,13 @@ package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
-import com.qualcomm.robotcore.hardware.DistanceSensor;
-import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
 import com.qualcomm.hardware.rev.Rev2mDistanceSensor;
+import com.qualcomm.robotcore.hardware.DistanceSensor;
+import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.hardware.DcMotor;
 import org.firstinspires.ftc.teamcode.Drive;
 import org.firstinspires.ftc.teamcode.SciLift;
 import org.firstinspires.ftc.teamcode.Arm;
@@ -17,12 +17,12 @@ import org.firstinspires.ftc.teamcode.Flick;
 import org.firstinspires.ftc.teamcode.FlickJr;
 import org.firstinspires.ftc.teamcode.Foundation;
 import org.firstinspires.ftc.teamcode.Claw;
-import com.qualcomm.robotcore.hardware.Servo;
 
 @TeleOp(name="15317 Teleop", group="Linear Opmode")
 
 public class Teleop15317 extends LinearOpMode {
 
+    //creating objects for all of the different parts
     private Drive d;
     private SciLift lift;
     private Collect collector;
@@ -32,15 +32,16 @@ public class Teleop15317 extends LinearOpMode {
     private FlickJr flickjr;
     private Foundation foundation;
 
-
     @Override
     public void runOpMode() {
 
+      //initializing every motor, servo, and sensor
+      //these names all need to match the names in the config
       d = new Drive(
-          hardwareMap.get(DcMotor.class, "rbmotor"),
-          hardwareMap.get(DcMotor.class, "rfmotor"),
-          hardwareMap.get(DcMotor.class, "lfmotor"),
-          hardwareMap.get(DcMotor.class, "lbmotor")
+        hardwareMap.get(DcMotor.class, "rbmotor"),
+        hardwareMap.get(DcMotor.class, "rfmotor"),
+        hardwareMap.get(DcMotor.class, "lfmotor"),
+        hardwareMap.get(DcMotor.class, "lbmotor")
       );
       lift = new SciLift(
         hardwareMap.get(DcMotor.class, "liftmotor")
@@ -70,26 +71,40 @@ public class Teleop15317 extends LinearOpMode {
 
       waitForStart();
       while (opModeIsActive()) {
-        //gamepad 1 = drive and collection
-        //gamepad 2 = lift, arm, foundation, claw
+        //gamepad 1
+          //drive..........sticks
+          //turbo..........right trigger
+
+        //gamepad 2
+          //lift...........right stick
+          //arm............left stick
+          //foundation.....Y to grab, X to release
+          //collection.....bumpers, left for out, right for in
+          //flicks.........hold X
+          //claw...........A to grab, B to release
 
         // gamepad 1
-        // d.setPower(
-        //   -gamepad1.left_stick_y,
-        //   -gamepad1.left_stick_x,
-        //   -gamepad1.right_stick_x,
-        //   gamepad1.right_trigger
-        // );
+        d.setPower(
+          -gamepad1.left_stick_y,
+          -gamepad1.left_stick_x,
+          -gamepad1.right_stick_x,
+          gamepad1.right_trigger
+        );
 
-        if (gamepad2.right_bumper) {
-          collector.in();
-        } else if (gamepad2.left_bumper) {
-          collector.out();
-        } else {
-          collector.rest();
+        //gamepad 2
+        if (gamepad1.y) {
+          foundation.grab();
+        } else if (gamepad1.x) {
+          foundation.release();
         }
 
-        if (gamepad2.x) { //collector servo
+        if (gamepad2.b) {
+          claw.release();
+        } else if (gamepad2.a) {
+          claw.grab();
+        }
+
+        if (gamepad2.x) { //the full flick, flickjr, claw process
           flick.setPos(0.1);
           if (flick.getPos() < 0.2) {
             flickjr.setPos(0.3);
@@ -100,29 +115,15 @@ public class Teleop15317 extends LinearOpMode {
         } else {
           flick.down();
           flickjr.down();
-          claw.release();
         }
-        if (gamepad1.b) { //collector servo
-          telemetry.addData("Flick Jr", "up");
-          flickjr.up();
+
+        if (gamepad2.right_bumper) {
+          collector.in();
+        } else if (gamepad2.left_bumper) {
+          collector.out();
         } else {
-          telemetry.addData("Flick Jr", "down");
-          flickjr.down();
+          collector.rest();
         }
-
-        if (gamepad1.y) {
-          foundation.grab();
-        } else if (gamepad1.x) {
-          foundation.release();
-        }
-
-        //gamepad 2
-        if (gamepad2.b /* left_bumper */) {
-          claw.release();
-        } else if (gamepad2.a  /* right_bumper */) {
-          claw.grab();
-        }
-
 
         if (-gamepad2.left_stick_y > 0) {
             arm.extend(Math.abs(-gamepad2.left_stick_y));
@@ -140,10 +141,7 @@ public class Teleop15317 extends LinearOpMode {
             lift.rest();
         }
 
-
         telemetry.addData("Status", "Run Time: ");
-        // telemetry.addData("Lift Power", lift.getPower());
-        // telemetry.addData("Arm Power", arm.getPower());
         telemetry.addData("Collect Power", collector.getPower());
         telemetry.addData("Dist Sensor", collector.getDistance());
         telemetry.addData("Ly", gamepad1.left_stick_y);
@@ -156,9 +154,6 @@ public class Teleop15317 extends LinearOpMode {
         telemetry.addData("Clicks: ", d.getClickslf());
         telemetry.addData("Lift", lift.getClicks());
         telemetry.addData("flickpos", flick.getPos());
-        // telemetry.addData("O,rientation")
-        // telemetry.addData("State")
-        // telemetry.addData("x,y")
         telemetry.update();
 
       }
