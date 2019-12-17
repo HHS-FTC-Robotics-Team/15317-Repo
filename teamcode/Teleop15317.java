@@ -4,10 +4,11 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
+import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
-import com.qualcomm.robotcore.hardware.DigitalChannel;
+import com.qualcomm.hardware.rev.Rev2mDistanceSensor;
 import org.firstinspires.ftc.teamcode.Drive;
 import org.firstinspires.ftc.teamcode.SciLift;
 import org.firstinspires.ftc.teamcode.Arm;
@@ -15,8 +16,6 @@ import org.firstinspires.ftc.teamcode.Collect;
 import org.firstinspires.ftc.teamcode.Flick;
 import org.firstinspires.ftc.teamcode.FlickJr;
 import org.firstinspires.ftc.teamcode.Foundation;
-import com.qualcomm.robotcore.hardware.DistanceSensor;
-import com.qualcomm.hardware.rev.Rev2mDistanceSensor;
 import org.firstinspires.ftc.teamcode.Claw;
 import com.qualcomm.robotcore.hardware.Servo;
 
@@ -47,8 +46,7 @@ public class Teleop15317 extends LinearOpMode {
         hardwareMap.get(DcMotor.class, "liftmotor")
       );
       arm = new Arm(
-        hardwareMap.get(DcMotor.class, "armmotor"),
-        hardwareMap.get(DigitalChannel.class, "armtouch")
+        hardwareMap.get(DcMotor.class, "armmotor")
       );
       collector = new Collect(
         hardwareMap.get(DcMotor.class, "col_left"),
