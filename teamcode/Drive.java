@@ -11,7 +11,7 @@ import com.qualcomm.robotcore.util.Range;
 
 public class Drive extends LinearOpMode {
 
-  //init motors and variables
+  //initializing motors and variables
   public double powerlf;
   public DcMotor motorlf = null;
   public double powerlb;
@@ -21,6 +21,7 @@ public class Drive extends LinearOpMode {
   public double powerrb;
   public DcMotor motorrb = null;
 
+  //initialized in order to "get" them in other parts of tbe code.
   public double LyInput;
   public double LxInput;
   public double RxInput;
