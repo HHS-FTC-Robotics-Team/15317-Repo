@@ -11,6 +11,7 @@ import com.qualcomm.robotcore.util.Range;
 
 public class Drive extends LinearOpMode {
 
+  //init motors and variables
   public double powerlf;
   public DcMotor motorlf = null;
   public double powerlb;
@@ -19,12 +20,14 @@ public class Drive extends LinearOpMode {
   public DcMotor motorrf = null;
   public double powerrb;
   public DcMotor motorrb = null;
+
   public double LyInput;
   public double LxInput;
   public double RxInput;
   public double TurboInput;
 
   public Drive(DcMotor lf, DcMotor lb, DcMotor rf, DcMotor rb) {
+    //the setdirections will change based on how the wheels are set up.
     powerlf = 0;
     motorlf = lf;
     motorlf.setDirection(DcMotor.Direction.FORWARD);
@@ -48,6 +51,11 @@ public class Drive extends LinearOpMode {
   }
 
   public void setPower(double Ly, double Lx, double Rx, double Trigger) {
+    //using the three controller inputs, we calculate the powers
+    //that the motors need in order to move.
+    //Ly = forward and backward
+    //Lx = left and right
+    //Rx = clockwise and counterclockwise
     LyInput = Ly;
     LxInput = Lx;
     RxInput = Rx;
@@ -56,6 +64,14 @@ public class Drive extends LinearOpMode {
     double leftback = (Ly + Lx + Rx)/3;
     double rightfront = (Ly - Lx - Rx)/3;
     double rightback = (Ly + Lx - Rx)/3;
+    //because we divided the powers by 3, they're somewhere between 0.333 and 1.
+    //if we want the motors to always be running at top speed, and still move in
+    //the right directions, we divide each number by the highest number
+    //as seen in the math below.
+    //the other piece is the trigger value. this is from 0 to 1, based on
+    //controller input. this value scales all of the powers, meaning that
+    //the robot will move between 1% and 100% speed based on how hard the
+    //trigger is held down. think of it like a gas pedal in a car.
     if (Trigger > 0) {
       double max = findMax(leftfront,leftback,rightfront,rightback);
       max = max / Trigger;
@@ -65,6 +81,7 @@ public class Drive extends LinearOpMode {
       rightfront = rightfront / max;
       rightback = rightback / max;
     }
+    //here we just set the power.
     powerlf = leftfront;
     motorlf.setPower(leftfront);
     powerlb = leftback;
@@ -75,12 +92,7 @@ public class Drive extends LinearOpMode {
     motorrb.setPower(rightback);
   }
 
-  // public void setPower(double lf, double lb, double rf, double rb) {
-  //   motorlf.setPower(lf);
-  //   motorlb.setPower(lb);
-  //   motorrf.setPower(rf);
-  //   motorrb.setPower(rb);
-  // }
+  //the following are get commands that return the values of the class' variables.
 
   public double getPowerlf() {
     double lf = motorlf.getPower();
@@ -88,6 +100,7 @@ public class Drive extends LinearOpMode {
     return powerlf;
   }
 
+  //we're only using one encoder to read the robot's position in autonomous.
   public double getClickslf() {
     return motorlf.getCurrentPosition();
   }
@@ -110,6 +123,7 @@ public class Drive extends LinearOpMode {
     return powerrb;
   }
 
+  //this function just compares all of the powers and returns the largest value.
   public double findMax(double lf,double lb,double rf,double rb) {
     if (lf >= lb && lf >= rf && lf >= rb) {
       return lf;
@@ -127,7 +141,7 @@ public class Drive extends LinearOpMode {
       return 1;
     }
   }
-  
+
   public double getLy() {
     return LyInput;
   }
@@ -141,6 +155,7 @@ public class Drive extends LinearOpMode {
     return TurboInput;
   }
 
+  //runopmode is always needed at the bottom of our classes because reasons.
   public void runOpMode() {
   }
 }
