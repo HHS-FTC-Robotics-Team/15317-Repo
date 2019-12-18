@@ -44,7 +44,7 @@ public class Gpsbrain extends LinearOpMode {
   double liftstartclicks = 0;
   public int count = 0;
 
-  //List of different command sequences
+  //List of different command sequences===================================================================================
 
   //public String[] states = new String[]{"lift", "rest"};
   //private double[] args = new double[]{-1000, 0};
@@ -75,6 +75,8 @@ public class Gpsbrain extends LinearOpMode {
   // private long[] args = new long[]{24000,-500, 5600};
   // private boolean[] isArgs = new boolean[]{true, true, true};
 
+  //======================================================================================================================
+
   private BNO055IMU imu = null;
   private Orientation lastAngles = new Orientation();
   private double globalAngle, power = 0.30, correction;
@@ -104,7 +106,7 @@ public class Gpsbrain extends LinearOpMode {
     if(states[count] == "init") {
       globalx = 0;
       globaly = 0;
-      globala = getAngle(); //we will always correct to globala
+      globala = getAngle(); //we will always correct to this angle
       d.resetEncoderlf();
       pop();
     }
