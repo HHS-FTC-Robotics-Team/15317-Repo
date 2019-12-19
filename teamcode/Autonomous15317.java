@@ -58,7 +58,7 @@ public class Autonomous15317 extends LinearOpMode {
 
         while (opModeIsActive()) {
             gps.update(); //all the autonomous stuff
-            gps.correct(); //keeping the robot straight
+            if (!gps.turning) { gps.correct(); } //keeping the robot straight
 
             telemetry.addData("State", gps.states[gps.count]);
             telemetry.addData("Count", gps.count);
@@ -66,6 +66,7 @@ public class Autonomous15317 extends LinearOpMode {
             telemetry.addData("clicks", gps.d.getClickslf());
             telemetry.addData("globalx", gps.globalx);
             telemetry.addData("globaly", gps.globaly);
+            telemetry.addData("goalclicks", gps.goalclicks);
             telemetry.update();
 
         }

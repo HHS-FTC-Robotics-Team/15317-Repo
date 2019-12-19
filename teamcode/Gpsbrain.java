@@ -27,6 +27,7 @@ import org.firstinspires.ftc.teamcode.SciLift;
 public class Gpsbrain extends LinearOpMode {
 
   public String state = "rest";
+  public Boolean turning = false;
   Drive d = null;
   double globalx = 0;
   double globaly = 0;
@@ -38,7 +39,7 @@ public class Gpsbrain extends LinearOpMode {
   double theta = 0;
   double dtheta = 0;
   double travelled = 0;
-  double goalclicks = 0;
+  public double goalclicks = 0;
   double startclicks = 0;
   double liftgoalclicks = 0;
   double liftstartclicks = 0;
@@ -66,9 +67,17 @@ public class Gpsbrain extends LinearOpMode {
   // private boolean[] isArgs = new boolean[]{false, false};
 
   // Testing global x and y
-  public String[] states = new String[]{"init", "collect", "strafeTo", "rest"};
-  private double[] args = new double[]{0, 0, 5000, 0};
-  private boolean[] isArgs = new boolean[]{false, true, true, false};
+  // public String[] states = new String[]{"init", "collect", "strafeTo", "rest"};
+  // private double[] args = new double[]{0, 0, 5000, 0};
+  // private boolean[] isArgs = new boolean[]{false, true, true, false};
+
+  // public String[] states = new String[]   {"init","forward","collect","forward","strafeTo", "out", "strafeTo","rest"};
+  // private double[] args = new double[]    {0, 500, 0, 1400, -6000, 0, -1000, 0};
+  // private boolean[] isArgs = new boolean[]{false, true, false, true, true,false, true, false};
+
+  public String[] states = new String[]   {"init","forwardTo","forwardTo","turn","forwardTo","forwardTo","turn","rest"};
+  private double[] args = new double[]    {0,800,0,180,800,0,180,0};
+  private boolean[] isArgs = new boolean[]{false, true,true,true, true,true,true,false};
 
   //Wait and Park
   // public String[] states = new String[]{"sleep", "forward", "strafeLeft"};
@@ -156,7 +165,7 @@ public class Gpsbrain extends LinearOpMode {
     }
     if(states[count] == "collect") {
       if(collect.getDistance() > 10) {
-        d.setPower(1, 0, 0, 0.5);
+        d.setPower(1, 0, 0, 0.6);
         collect.in();
         globaly += d.getClickslf();
         d.resetEncoderlf();
@@ -170,6 +179,7 @@ public class Gpsbrain extends LinearOpMode {
     }
     if(states[count] == "out") {
       if(collect.getDistance() < 20) {
+        d.setPower(0, 0, 0, 0);
         collect.out();
       } else if (collect.getDistance() > 20) {
         collect.rest();
@@ -220,10 +230,11 @@ public class Gpsbrain extends LinearOpMode {
   }
 
   public void turn() {
+    this.turning = true;
     theta = getAngle();
     d.setPower(0, 0, (dtheta - theta) / (Math.abs(dtheta - theta)) , 0.6);
-    globala = getAngle();
     if(Math.abs(theta - dtheta) < 2) { //if diff is less than 2 degrees
+      this.turning = false;
       globala = getAngle();
       pop();
     }
@@ -235,31 +246,47 @@ public class Gpsbrain extends LinearOpMode {
   public void correct() {
     double current = getAngle();
     double power =  (globala - current) / (Math.abs(globala - current));
-    if (globala - current > 1 ) {
+    if (globala - current > 1) {
       d.setPower(d.getLy(), d.getLx(), power , d.getTurbo());
+    }
+    if (globala - current < -1) {
+      d.setPower(d.getLy(), d.getLx(), power/2 , d.getTurbo());
     }
   }
 
   public void forwardTo(double y){ //init forward function
-    forward(y - globaly);
+   double dist = y-globaly;
+    if (globala > 170 && globala < 190) {
+      forward(-dist);
+    } else {
+      forward(dist);
+    }
   }
+  
+  public void setGlobaly () {
+    if (globala > 170 && globala < 190) {
+      globaly -= d.getClickslf();
+    } else {
+      globaly += d.getClickslf();
+    } 
+    
+    d.resetEncoderlf();
+  }
+  
   public void forward(double clicks){
     d.resetEncoderlf();
     goalclicks = clicks; // how far to go
   }
   public void forward(){
     if(globaly > goalclicks - 25 && globaly < goalclicks + 25) {
-      globaly += d.getClickslf();
-      d.resetEncoderlf();
+      setGlobaly();
       pop();
     } else if(globaly < goalclicks) {
       d.setPower(1, 0, 0, 0.6);
-      globaly += d.getClickslf();
-      d.resetEncoderlf();
+      setGlobaly();
     } else if(globaly > goalclicks) {
       d.setPower(-1, 0, 0, 0.6);
-      globaly += d.getClickslf();
-      d.resetEncoderlf();
+      setGlobaly();
     }
   }
 

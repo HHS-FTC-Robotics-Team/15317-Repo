@@ -26,13 +26,13 @@ public class Collect extends LinearOpMode {
   }
 
   public void in() {
-    Lmtr.setPower(1);
-    Rmtr.setPower(1);
+    Lmtr.setPower(0.8);
+    Rmtr.setPower(0.8);
   }
 
   public void out() {
-    Lmtr.setPower(-1);
-    Rmtr.setPower(-1);
+    Lmtr.setPower(-0.8);
+    Rmtr.setPower(-0.8);
   }
 
   public void rest() {
