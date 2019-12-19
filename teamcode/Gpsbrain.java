@@ -230,16 +230,19 @@ public class Gpsbrain extends LinearOpMode {
   }
 
   public void turn() {
-    this.turning = true;
-    theta = getAngle();
-    d.setPower(0, 0, (dtheta - theta) / (Math.abs(dtheta - theta)) , 0.6);
-    if(Math.abs(theta - dtheta) < 2) { //if diff is less than 2 degrees
-      this.turning = false;
-      globala = getAngle();
-      pop();
-    }
+    // this.turning = true;
+    // theta = getAngle();
+    // d.setPower(0, 0, (dtheta - theta) / (Math.abs(dtheta - theta)) , 0.6);
+    // if(Math.abs(theta - dtheta) < 2) { //if diff is less than 2 degrees
+    //   this.turning = false;
+    //   globala = getAngle();
+    //   pop();
+    // }
+    globala = 180;
+    pop();
   }
   public void turn(double degrees){
+
     dtheta = theta + degrees;
   }
 
@@ -262,20 +265,21 @@ public class Gpsbrain extends LinearOpMode {
       forward(dist);
     }
   }
-  
+
   public void setGlobaly () {
     if (globala > 170 && globala < 190) {
       globaly -= d.getClickslf();
     } else {
       globaly += d.getClickslf();
-    } 
-    
+    }
+
     d.resetEncoderlf();
   }
-  
+
   public void forward(double clicks){
     d.resetEncoderlf();
-    goalclicks = clicks; // how far to go
+    goalclicks = clicks + globaly; // how far to go
+    //goaly =
   }
   public void forward(){
     if(globaly > goalclicks - 25 && globaly < goalclicks + 25) {
