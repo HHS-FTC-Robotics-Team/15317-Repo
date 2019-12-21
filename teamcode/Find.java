@@ -71,17 +71,21 @@ public class Find extends LinearOpMode {
   }
 
 
-  public double findSkystoneAngle() {
+  public double[] findSkystoneAngle() {
+    int SkystoneCount = 0;
     recognitions = tfodSkyStone.getRecognitions();
     if (recognitions.size() > 0) {
       for (Recognition recognition : recognitions) {
         if (recognition.getLabel().equals("Skystone")) {
+          SkystoneCount += 1;
           ObjectAngle = recognition.estimateAngleToObject(AngleUnit.DEGREES);
-          return ObjectAngle;
+          double result[] = {ObjectAngle, SkystoneCount};
+          return result;
         }
       }
     }
-    return ObjectAngle;
+    double result[] = {0, 0};
+    return result;
   }
 
   public int countSkystones() {

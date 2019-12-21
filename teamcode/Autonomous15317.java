@@ -62,11 +62,13 @@ public class Autonomous15317 extends LinearOpMode {
 
             telemetry.addData("State", gps.states[gps.count]);
             telemetry.addData("Count", gps.count);
-            telemetry.addData("Stones", gps.find());
+            telemetry.addData("Angle", gps.seekAngle);
             telemetry.addData("clicks", gps.d.getClickslf());
             telemetry.addData("globalx", gps.globalx);
             telemetry.addData("globaly", gps.globaly);
+            telemetry.addData("globala", gps.globala);
             telemetry.addData("goalclicks", gps.goalclicks);
+            telemetry.addData("globaly", gps.relativey);
             telemetry.update();
 
         }

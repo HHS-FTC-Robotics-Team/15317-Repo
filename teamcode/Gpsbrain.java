@@ -28,6 +28,9 @@ public class Gpsbrain extends LinearOpMode {
 
   public String state = "rest";
   public Boolean turning = false;
+  boolean angleIsSeeked = false;
+  double seekAngle = 0;
+  double seekDist = 0;
   Drive d = null;
   double globalx = 0;
   double globaly = 0;
@@ -40,6 +43,8 @@ public class Gpsbrain extends LinearOpMode {
   double dtheta = 0;
   double travelled = 0;
   public double goalclicks = 0;
+  public double relativex = 0;
+  public double relativey = 0;
   double startclicks = 0;
   double liftgoalclicks = 0;
   double liftstartclicks = 0;
@@ -61,10 +66,10 @@ public class Gpsbrain extends LinearOpMode {
   // private double[] args = new double[]{-1000, 5600};
   // private boolean[] isArgs = new boolean[]{true, true};
 
-  // Just Collecting
-  // public String[] states = new String[]{"init", "collect", "rest"};
-  // private long[] args = new long[]{0, 0};
-  // private boolean[] isArgs = new boolean[]{false, false};
+  // Just seeking
+  public String[] states = new String[]{"init", "seek", "rest"};
+  private long[] args = new long[]{0, 0, 0};
+  private boolean[] isArgs = new boolean[]{false, false, false};
 
   // Testing global x and y
   // public String[] states = new String[]{"init", "collect", "strafeTo", "rest"};
@@ -75,9 +80,9 @@ public class Gpsbrain extends LinearOpMode {
   // private double[] args = new double[]    {0, 500, 0, 1400, -6000, 0, -1000, 0};
   // private boolean[] isArgs = new boolean[]{false, true, false, true, true,false, true, false};
 
-  public String[] states = new String[]   {"init","forwardTo","forwardTo","turn","forwardTo","forwardTo","turn","rest"};
-  private double[] args = new double[]    {0,800,0,180,800,0,180,0};
-  private boolean[] isArgs = new boolean[]{false, true,true,true, true,true,true,false};
+  // public String[] states = new String[]   {"init","strafeTo","strafeTo","turn","strafeTo","strafeTo","turn","rest"};
+  // private double[] args = new double[]    {0,800,0,180,800,0,180,0};
+  // private boolean[] isArgs = new boolean[]{false, true,true,true, true,true,true,false};
 
   //Wait and Park
   // public String[] states = new String[]{"sleep", "forward", "strafeLeft"};
@@ -149,19 +154,38 @@ public class Gpsbrain extends LinearOpMode {
         this.strafeTo(args[count]);
         isArgs[count] = false;
       }
-      strafe();
+      this.strafe();
     }
     if(states[count] == "seek") {
-      double angle = f.findSkystoneAngle();
-      if(angle < 10 && angle > -10) {
-        globalx += d.getClickslf();
-        d.resetEncoderlf();
-        pop();
+      //angleIsSeeked = false;
+      if(!angleIsSeeked) {
+        double[] result = f.findSkystoneAngle();
+        seekAngle = result[0];
+        if(result[1] > 0) {
+          seekDist = 6000/Math.tan(seekAngle);
+          //strafe(seekDist);
+          angleIsSeeked = true;
+          // if(seekAngle < 0) {
+          //   seekDist = seekDist * -1;
+          // }
+          strafe(seekDist);
+        }
       } else {
-        d.setPower(0, 1*angle/20, 0, 0);
-        globalx += d.getClickslf();
-        d.resetEncoderlf();
+        //seekAngle =-500;
+        strafe();
       }
+      // double angle = seekAngle;
+      // double dist = seekDist;
+      // if(angle < 10 && angle > -10) {
+      //   globalx += d.getClickslf();
+      //   d.resetEncoderlf();
+      //   angleIsSeeked = false;
+      //   pop();
+      // } else {
+      //   d.setPower(0, dist/1000, 0, 0);
+      //   globalx += d.getClickslf();
+      //   d.resetEncoderlf();
+      // }
     }
     if(states[count] == "collect") {
       if(collect.getDistance() > 10) {
@@ -242,7 +266,6 @@ public class Gpsbrain extends LinearOpMode {
     pop();
   }
   public void turn(double degrees){
-
     dtheta = theta + degrees;
   }
 
@@ -256,70 +279,88 @@ public class Gpsbrain extends LinearOpMode {
       d.setPower(d.getLy(), d.getLx(), power/2 , d.getTurbo());
     }
   }
-
-  public void forwardTo(double y){ //init forward function
-   double dist = y-globaly;
-    if (globala > 170 && globala < 190) {
-      forward(-dist);
-    } else {
-      forward(dist);
-    }
-  }
-
+  
   public void setGlobaly () {
     if (globala > 170 && globala < 190) {
       globaly -= d.getClickslf();
     } else {
       globaly += d.getClickslf();
-    }
-
+    } 
     d.resetEncoderlf();
   }
-
+  
+  public void setGlobalx () {
+    if (globala > 170 && globala < 190) {
+      globalx -= d.getClickslf();
+    } else {
+      globalx += d.getClickslf();
+    } 
+    d.resetEncoderlf();
+  }
+  
+  public void forwardTo(double y){ //init forward function
+    // double dist = y-globaly;
+    if (globala > 170 && globala < 190) { //turned around
+      forward(-y);
+    } else {
+      forward(y);
+    }
+  }
+  
   public void forward(double clicks){
     d.resetEncoderlf();
-    goalclicks = clicks + globaly; // how far to go
-    //goaly =
+    goalclicks = clicks; // how far to go
+    // relativey = globaly;
   }
   public void forward(){
-    if(globaly > goalclicks - 25 && globaly < goalclicks + 25) {
+    double dist = Math.abs(goalclicks) - Math.abs(relativey);
+    double p = Math.abs(dist)/120;
+    if(relativey > goalclicks - 25 && relativey < goalclicks + 25) {
       setGlobaly();
       pop();
-    } else if(globaly < goalclicks) {
-      d.setPower(1, 0, 0, 0.6);
+    } else if(relativey < goalclicks) {
+      d.setPower(1, 0, 0, 0.6*p);
+      relativey += d.getClickslf();
       setGlobaly();
-    } else if(globaly > goalclicks) {
-      d.setPower(-1, 0, 0, 0.6);
+    } else if(relativey > goalclicks) {
+      d.setPower(-1, 0, 0, 0.6*p);
+      relativey += d.getClickslf();
       setGlobaly();
     }
   }
 
   public void strafeTo(double x){ //init forward function
-    strafe(x - globalx);
+    if (globala > 170 && globala < 190) { //turned around
+      strafe(-x);
+    } else {
+      strafe(x);
+    }
   }
   public void strafe(double clicks) {
     d.resetEncoderlf();
     goalclicks = clicks; // how far to go
   }
   public void strafe() {
-    if(globalx > goalclicks - 25 && globalx < goalclicks + 25) {
-      globalx += d.getClickslf();
-      d.resetEncoderlf();
+    double dist = Math.abs(goalclicks) - Math.abs(relativey);
+    double p = Math.abs(dist)/120;
+    if(relativex > goalclicks - 75 && relativex < goalclicks + 75) {
+      setGlobalx();
       pop();
-    } else if(globalx < goalclicks) {
-      d.setPower(0,-1,0,1);
-      globalx += d.getClickslf();
-      d.resetEncoderlf();
-    } else if(globalx > goalclicks) {
-      d.setPower(0,1,0,1);
-      globalx += d.getClickslf();
-      d.resetEncoderlf();
+    } else if(relativex < goalclicks) {
+      d.setPower(0, -1, 0, 0.6*p);
+      relativex += d.getClickslf();
+      setGlobalx();
+    } else if(relativex > goalclicks) {
+      d.setPower(0, 1, 0, 0.6*p);
+      relativex += d.getClickslf();
+      setGlobalx();
     }
   }
 
 
   public double find() {
-    double angle = f.findSkystoneAngle();
+    double[] result = f.findSkystoneAngle();
+    double angle = result[0];
     return angle;
   }
 
