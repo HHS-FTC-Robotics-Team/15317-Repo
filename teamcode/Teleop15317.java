@@ -85,7 +85,7 @@ public class Teleop15317 extends LinearOpMode {
 
         // gamepad 1
         d.setPower(
-          -gamepad1.left_stick_y,
+          gamepad1.left_stick_y,
           -gamepad1.left_stick_x,
           -gamepad1.right_stick_x,
           gamepad1.right_trigger
@@ -126,17 +126,17 @@ public class Teleop15317 extends LinearOpMode {
         }
 
         if (-gamepad2.left_stick_y > 0) {
-            arm.extend(Math.abs(-gamepad2.left_stick_y));
+            arm.extend(Math.abs(gamepad2.left_stick_y));
         } else if (-gamepad2.left_stick_y < 0){
-            arm.retract(Math.abs(-gamepad2.left_stick_y));
+            arm.retract(Math.abs(gamepad2.left_stick_y));
         } else {
             arm.rest();
         }
 
         if (-gamepad2.right_stick_y > 0) {
-            lift.up(Math.abs(-gamepad2.right_stick_y));
+            lift.up(Math.abs(gamepad2.right_stick_y));
         } else if (-gamepad2.right_stick_y < 0){
-            lift.down(Math.abs(-gamepad2.right_stick_y));
+            lift.down(Math.abs(gamepad2.right_stick_y));
         } else {
             lift.rest();
         }

@@ -17,6 +17,11 @@ public class Claw extends LinearOpMode {
   private double min_left_pos = 0.75;
   private double max_right_pos = .0;
   private double min_right_pos = .25;
+  
+  // private double max_left_pos = 0;
+  // private double min_left_pos = .25;
+  // private double max_right_pos = 1;
+  // private double min_right_pos = .75;
 
   //constructor
   public Claw (Servo s, Servo s2) {
