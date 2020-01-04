@@ -52,46 +52,48 @@ public class Gpsbrain extends LinearOpMode {
 
   //List of different command sequences===================================================================================
 
-  //public String[] states = new String[]{"lift", "rest"};
-  //private double[] args = new double[]{-1000, 0};
-  //private boolean[] isArgs = new boolean[]{true, false};
+  // without seeking
+    //blue
+    // public String[] states = new String[]   {"init","forwardTo","lift","turn","collect","forwardTo","strafeTo", "out", "strafeTo","rest"};
+    // private double[] args = new double[]    {0, 1200, 0, 180, 0, 1000, -4000, 0, -2000, 0};
+    // private boolean[] isArgs = new boolean[]{false, true, true, true, false, true, true,false, true, false};
+    //red
+    // public String[] states = new String[]   {"init","forwardTo","lift","turn","collect","forwardTo","strafeTo", "out", "strafeTo","rest"};
+    // private double[] args = new double[]    {0, 1200, 0, 180, 0, 1000, 4000, 0, 2000, 0};
+    // private boolean[] isArgs = new boolean[]{false, true, true, true, false, true, true,false, true, false};
 
-  // Collect
-  // public String[] states = new String[]{"forward", "seek","turn","collect","forward","strafeRight","out","rest"};
-  // private double[] args = new double[]{-1000, 0, 180, 0, -2500,7000, 0,0};
-  // private boolean[] isArgs = new boolean[]{true, false, true, false, true, true, false,false};
 
-  // Park
-  // public String[] states = new String[]{"forward", "strafeRight"};
-  // private double[] args = new double[]{-1000, 5600};
-  // private boolean[] isArgs = new boolean[]{true, true};
+  // with seeking
+    //blue
+    // public String[] states = new String[]   {"init","forwardTo","oldseek","lift","turn","collect","forwardTo","strafeTo", "out", "strafeTo","rest"};
+    // private double[] args = new double[]    {0, 1200, 0, 0, 180, 0, 1000, -4000, 0, -2000, 0};
+    // private boolean[] isArgs = new boolean[]{false, true, false, true, true, false, true, true,false, true, false};
+    //red
+    // public String[] states = new String[]   {"init","forwardTo","oldseek","lift","turn","collect","forwardTo","strafeTo", "out", "strafeTo","rest"};
+    // private double[] args = new double[]    {0, 1200, 0, 0, 180, 0, 1000, 4000, 0, 2000, 0};
+    // private boolean[] isArgs = new boolean[]{false, true, false, true, true, false, true, true,false, true, false};
 
-  // Just seeking
-  // public String[] states = new String[]{"init", "seek", "rest"};
-  // private long[] args = new long[]{0, 0, 0};
-  // private boolean[] isArgs = new boolean[]{false, false, false};
 
-  // Testing global x and y
-  // public String[] states = new String[]{"init", "collect", "strafeTo", "rest"};
-  // private double[] args = new double[]{0, 0, 5000, 0};
-  // private boolean[] isArgs = new boolean[]{false, true, true, false};
+  // Wait and Park
+    //blue
+    // public String[] states = new String[]{"sleep", "forward", "strafeTo", "rest"};
+    // private double[] args = new double[]{24000, 500, -1200, 0};
+    // private boolean[] isArgs = new boolean[]{true, true, true, false};
+    //red
+    // public String[] states = new String[]{"sleep", "forward", "strafeTo", "rest"};
+    // private double[] args = new double[]{24000, 500, 1200, 0};
+    // private boolean[] isArgs = new boolean[]{true, true, true, false};
+    
+  //Don't wait, just park
+    //blue
+    public String[] states = new String[]{"forward", "strafeTo", "rest"};
+    private double[] args = new double[]{500, -1200, 0};
+    private boolean[] isArgs = new boolean[]{ true, true, false};
+    //red
+    // public String[] states = new String[]{"forward", "strafeTo", "rest"};
+    // private double[] args = new double[]{500, -1200, 0};
+    // private boolean[] isArgs = new boolean[]{ true, true, false};
 
-  public String[] states = new String[]   {"init","forwardTo","lift","turn","collect","forwardTo","strafeTo", "out", "strafeTo","rest"};
-  private double[] args = new double[]    {0, 1200, 0, 180, 0, 1000, -4000, 0, -1000, 0};
-  private boolean[] isArgs = new boolean[]{false, true, true, true, false, true, true,false, true, false};
-  
-  // public String[] states = new String[]   {"init","forwardTo","lift","rest"};
-  // private double[] args = new double[]    {0, 2500, 0,0};
-  // private boolean[] isArgs = new boolean[]{false, true, true,false};
-
-  // public String[] states = new String[]   {"init","strafeTo","strafeTo","turn","strafeTo","strafeTo","turn","rest"};
-  // private double[] args = new double[]    {0,800,0,180,800,0,180,0};
-  // private boolean[] isArgs = new boolean[]{false, true,true,true, true,true,true,false};
-
-  //Wait and Park
-  // public String[] states = new String[]{"sleep", "forward", "strafeLeft"};
-  // private long[] args = new long[]{24000,-500, 5600};
-  // private boolean[] isArgs = new boolean[]{true, true, true};
 
   //======================================================================================================================
 
@@ -191,6 +193,28 @@ public class Gpsbrain extends LinearOpMode {
       //   d.resetEncoderlf();
       // }
     }
+    if(states[count] == "oldseek") {
+      if (isArgs[count]) { //runs the first time, the initial check
+        double[] result = f.findSkystoneAngle();
+        double angle = result[0];
+        if (result[1] == 0) {
+          pop(); //pops if theres no block, that way we can at least try for any block.
+        }
+        isArgs[count] = false;
+      } else {
+        double[] result = f.findSkystoneAngle();
+        double angle = result[0];
+        if(angle < 10 && angle > -10) {
+          globalx += d.getClickslf();
+          d.resetEncoderlf();
+          pop();
+        } else {
+          d.setPower(0, 1*angle/20, 0, 0.6);
+          globalx += d.getClickslf();
+          d.resetEncoderlf();
+        }
+      }
+    }
     if(states[count] == "collect") {
       if(collect.getDistance() > 10) {
         d.setPower(1, 0, 0, 0.6);
@@ -230,16 +254,17 @@ public class Gpsbrain extends LinearOpMode {
         pop();
       }
     }
-    // if(states[count] == "sleep") {
-    //   if(isArgs[count]) {
-    //     long slep = args[count];
-    //     sleep(slep);
-    //     isArgs[count] = false;
-    //     pop();
-    //   } else {
-    //     pop();
-    //   }
-    // }
+    if(states[count] == "sleep") {
+      if(isArgs[count]) {
+        double slep = args[count];
+        long bruh = (long)slep * 10;
+        sleep(bruh);
+        isArgs[count] = false;
+        pop();
+      } else {
+        pop();
+      }
+    }
   }
 
 
@@ -285,25 +310,25 @@ public class Gpsbrain extends LinearOpMode {
       d.setPower(d.getLy(), d.getLx(), power/2 , d.getTurbo());
     }
   }
-  
+
   public void setGlobaly () {
     if (globala > 170 && globala < 190) {
       globaly -= d.getClickslf();
     } else {
       globaly += d.getClickslf();
-    } 
+    }
     d.resetEncoderlf();
   }
-  
+
   public void setGlobalx () {
     if (globala > 170 && globala < 190) {
       globalx -= d.getClickslf();
     } else {
       globalx += d.getClickslf();
-    } 
+    }
     d.resetEncoderlf();
   }
-  
+
   public void forwardTo(double y){ //init forward function
     // double dist = y-globaly;
     if (globala > 170 && globala < 190) { //turned around
@@ -312,7 +337,7 @@ public class Gpsbrain extends LinearOpMode {
       forward(y);
     }
   }
-  
+
   public void forward(double clicks){
     d.resetEncoderlf();
     goalclicks = clicks; // how far to go

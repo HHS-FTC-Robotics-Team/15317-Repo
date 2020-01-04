@@ -8,8 +8,8 @@ import com.qualcomm.robotcore.hardware.Servo;
 public class Foundation extends LinearOpMode {
 
   private Servo left = null;
-  private double lmax = .2; // Maximum rotational position
-  private double lmin = .8; // Minimum rotational position
+  private double lmax = .21; // Maximum rotational position
+  private double lmin = .7; // Minimum rotational position
   private double lmid = .5;
   
   private String currentPos = "mid";
