@@ -31,6 +31,8 @@ public class Teleop15317 extends LinearOpMode {
     private Flick flick;
     private FlickJr flickjr;
     private Foundation foundation;
+    
+    private boolean yIsDown = false;
 
     @Override
     public void runOpMode() {
@@ -65,8 +67,7 @@ public class Teleop15317 extends LinearOpMode {
         hardwareMap.get(Servo.class, "hit")
       );
       foundation = new Foundation(
-        hardwareMap.get(Servo.class, "foundationleft"),
-        hardwareMap.get(Servo.class, "foundationright")
+        hardwareMap.get(Servo.class, "foundation")
       );
 
       waitForStart();
@@ -92,10 +93,11 @@ public class Teleop15317 extends LinearOpMode {
         );
 
         //gamepad 2
-        if (gamepad1.y) {
-          foundation.grab();
-        } else if (gamepad1.x) {
-          foundation.release();
+        if (gamepad2.y && !yIsDown) {
+          yIsDown = true;
+          foundation.nextPos();
+        } else if (!gamepad2.y) {
+          yIsDown = false;
         }
 
         if (gamepad2.b) {
@@ -105,10 +107,10 @@ public class Teleop15317 extends LinearOpMode {
         }
 
         if (gamepad2.x) { //the full flick, flickjr, claw process
-          flick.setPos(0.1);
-          if (flick.getPos() < 0.2) {
-            flickjr.setPos(0.3);
-            if (flickjr.getPos() < 0.5) {
+          flick.setPos(0.0);
+          if (flick.getPos() < 0.05) {
+            flickjr.setPos(0.2);
+            if (flickjr.getPos() < 0.25) {
               claw.grab();
             }
           }
@@ -125,9 +127,9 @@ public class Teleop15317 extends LinearOpMode {
           collector.rest();
         }
 
-        if (-gamepad2.left_stick_y > 0) {
-            arm.extend(Math.abs(gamepad2.left_stick_y));
-        } else if (-gamepad2.left_stick_y < 0){
+        if (gamepad2.left_stick_y > 0) {
+            arm.extend(Math.abs(gamepad2.left_stick_y*0.75));
+        } else if (gamepad2.left_stick_y < 0){
             arm.retract(Math.abs(gamepad2.left_stick_y));
         } else {
             arm.rest();

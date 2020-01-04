@@ -8,24 +8,37 @@ import com.qualcomm.robotcore.hardware.Servo;
 public class Foundation extends LinearOpMode {
 
   private Servo left = null;
-  private Servo right = null;
-  private double rmax = .1; // Maximum rotational position
-  private double rmin = .8; // Minimum rotational position
-  private double lmax = 1; // Maximum rotational position
-  private double lmin = .3; // Minimum rotational position
+  private double lmax = .2; // Maximum rotational position
+  private double lmin = .8; // Minimum rotational position
+  private double lmid = .5;
+  
+  private String currentPos = "mid";
 
-  public Foundation (Servo l, Servo r) {
+  public Foundation (Servo l) {
     left = l;
-    right = r;
   }
 
   public void grab() {
     left.setPosition(lmin);
-    right.setPosition(rmin);
+  }
+  public void mid() {
+    left.setPosition(lmid);
   }
   public void release() {
     left.setPosition(lmax);
-    right.setPosition(rmax);
+  }
+  
+  public void nextPos() {
+    if(currentPos == "down") {
+      currentPos = "up";
+      release();
+    } else if(currentPos == "up") {
+      currentPos = "mid";
+      mid();
+    } else if(currentPos == "mid") {
+      currentPos = "down";
+      grab();
+    }
   }
 
   public void runOpMode() {
