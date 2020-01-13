@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
@@ -14,6 +15,7 @@ import org.firstinspires.ftc.teamcode.Drive;
 import org.firstinspires.ftc.teamcode.Collect;
 import org.firstinspires.ftc.teamcode.Find;
 import org.firstinspires.ftc.teamcode.SciLift;
+import org.firstinspires.ftc.teamcode.Foundation;
 
 @Autonomous
 
@@ -25,6 +27,7 @@ public class Autonomous15317 extends LinearOpMode {
     private Gpsbrain gps;
     private Find f;
     private SciLift lift;
+    private Foundation foundation;
 
     @Override
     public void runOpMode() {
@@ -51,6 +54,10 @@ public class Autonomous15317 extends LinearOpMode {
         imu = hardwareMap.get(BNO055IMU.class, "imu");
 
         gps = new Gpsbrain(d, imu, c, f, lift);
+        
+        foundation = new Foundation(
+            hardwareMap.get(Servo.class, "foundation")
+          );
 
         telemetry.addData("Status", "Initialized");
         telemetry.update();
@@ -58,6 +65,7 @@ public class Autonomous15317 extends LinearOpMode {
 
         while (opModeIsActive()) {
             gps.update(); //all the autonomous stuff
+            foundation.release();
             if (!gps.turning) { gps.correct(); } //keeping the robot straight
 
             telemetry.addData("State", gps.states[gps.count]);

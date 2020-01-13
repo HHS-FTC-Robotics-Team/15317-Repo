@@ -81,13 +81,14 @@ public class Gpsbrain extends LinearOpMode {
     // private boolean[] isArgs = new boolean[]{true, true, true, false};
     //red
     // public String[] states = new String[]{"sleep", "forward", "strafeTo", "rest"};
-    // private double[] args = new double[]{24000, 500, 1200, 0};
+    // private double[] args = new double[]{2400, 500, 1200, 0};
     // private boolean[] isArgs = new boolean[]{true, true, true, false};
     
   //Don't wait, just park
     //blue
     public String[] states = new String[]{"forward", "strafeTo", "rest"};
-    private double[] args = new double[]{500, -1200, 0};
+    private double[] args = new double[]{50, 2400, 0}; //changed the 800 to 50
+
     private boolean[] isArgs = new boolean[]{ true, true, false};
     //red
     // public String[] states = new String[]{"forward", "strafeTo", "rest"};
@@ -345,7 +346,8 @@ public class Gpsbrain extends LinearOpMode {
   }
   public void forward(){
     double dist = Math.abs(goalclicks) - Math.abs(relativey);
-    double p = Math.abs(dist)/120;
+    // double p = Math.abs(dist)/120;
+    double p = 0.5; //needs to be changed back to the above line ====================================
     if(relativey > goalclicks - 25 && relativey < goalclicks + 25) {
       setGlobaly();
       pop();

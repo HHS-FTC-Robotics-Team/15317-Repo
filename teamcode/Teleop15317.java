@@ -31,8 +31,9 @@ public class Teleop15317 extends LinearOpMode {
     private Flick flick;
     private FlickJr flickjr;
     private Foundation foundation;
-    
+
     private boolean yIsDown = false;
+    private boolean y1IsDown = false;
 
     @Override
     public void runOpMode() {
@@ -91,6 +92,12 @@ public class Teleop15317 extends LinearOpMode {
           -gamepad1.right_stick_x,
           gamepad1.right_trigger
         );
+        if (gamepad1.y && !y1IsDown) {
+          y1IsDown = true;
+          foundation.alldown();
+        } else if (!gamepad1.y) {
+          y1IsDown = false;
+        }
 
         //gamepad 2
         if (gamepad2.y && !yIsDown) {

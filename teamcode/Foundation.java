@@ -11,7 +11,7 @@ public class Foundation extends LinearOpMode {
   private double lmax = .21; // Maximum rotational position
   private double lmin = .7; // Minimum rotational position
   private double lmid = .5;
-  
+
   private String currentPos = "mid";
 
   public Foundation (Servo l) {
@@ -27,7 +27,10 @@ public class Foundation extends LinearOpMode {
   public void release() {
     left.setPosition(lmax);
   }
-  
+  public void alldown() {
+    left.setPosition(.85);
+  }
+
   public void nextPos() {
     if(currentPos == "down") {
       currentPos = "up";
