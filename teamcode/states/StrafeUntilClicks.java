@@ -19,8 +19,6 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SO
 package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
-import com.qualcomm.hardware.rev.Rev2mDistanceSensor;
-import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
@@ -48,11 +46,10 @@ import java.util.Date;
 public class ForwardUntilDist extends OpMode {
     /* Declare OpMode members. */
     public Drive d = null;
-    public DistanceSensor dist = null;
     public Boolean running = true;
 
     @Override
-    public void init() {
+    public void init(clicks) {
         telemetry.addData("Status", "Initialized");
         d = new Drive(
             hardwareMap.get(DcMotor.class, "rbmotor"),
@@ -60,8 +57,8 @@ public class ForwardUntilDist extends OpMode {
             hardwareMap.get(DcMotor.class, "lfmotor"),
             hardwareMap.get(DcMotor.class, "lbmotor")
             );
-        dist = hardwareMap.get(Rev2mDistanceSensor.class, "distance_sensor");
-        
+        d.resetEncoderlf;
+        goal = clicks;
     }
 
     /*
@@ -76,12 +73,11 @@ public class ForwardUntilDist extends OpMode {
      */
     @Override
     public void start() {
-        d.setPower(1, 0, 0, 1);
-        if(false) {
-            d.setPower(0, 0, 0, 0);
-            //stop();
-            running = false;
-        }
+      if (goal < 0) {
+        d.setPower(0, -1, 0, 1);
+      } else {
+        d.setPower(0, 1, 0, 1);
+      }
     }
 
     /*
@@ -89,8 +85,15 @@ public class ForwardUntilDist extends OpMode {
      */
     @Override
     public void loop() {
-
-
+      current = d.getClickslf;
+      if(current > goal - 30 && current < goal + 30) {
+          d.setPower(0, 0, 0, 0);
+          running = false;
+      } else if (current > goal) {
+        d.setPower(0, -1, 0, 1);
+      } else if (current < goal) {
+        d.setPower(0, 1, 0, 1);
+      }
     }
 
     /*
