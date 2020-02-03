@@ -13,15 +13,17 @@ NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FO
 DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
+
 package org.firstinspires.ftc.teamcode.states;
 
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.hardware.HardwareMap;
+import com.qualcomm.robotcore.hardware.Servo;
+import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import com.qualcomm.hardware.bosch.BNO055IMU;
-import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
@@ -30,9 +32,8 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import org.firstinspires.ftc.teamcode.Drive;
-import org.firstinspires.ftc.teamcode.OurState;
-
 import java.text.SimpleDateFormat;
+import org.firstinspires.ftc.teamcode.OurState;
 import java.util.Date;
 
 /**
@@ -45,49 +46,50 @@ import java.util.Date;
  * Remove a @Disabled the on the next line or two (if present) to add this opmode to the Driver Station OpMode list,
  * or add a @Disabled annotation to prevent this OpMode from being added to the Driver Station
  */
-@Autonomous
 
-public class StrafeUntilClicks extends OurState {
-  
+public class TurnUntilAngle extends OurState {
     /* Declare OpMode members. */
     public Drive d = null;
-    public double goal = 0;
-    public double current = 0;
-    private static double ACCURACY = 100;
-    //imu
     private BNO055IMU imu = null;
-    double globala = 0;
-    private Orientation lastAngles = null;
+    double theta = 0;
+    double dtheta = 90;
+    private Orientation lastAngles = null; // new Orientation();
     private double globalAngle, power = .30, correction;
     
-    public StrafeUntilClicks(int g) {
+    public TurnUntilAngle(double goalangle) {
       super();
-      goal = g;
-      
+      dtheta = goalangle;
+
     }
     
-    
-    @Override
     public void init(HardwareMap hm) {
-        hardwareMap = hm;
-        d = new Drive(
-        hardwareMap.get(DcMotor.class, "rbmotor"),
-        hardwareMap.get(DcMotor.class, "rfmotor"),
-        hardwareMap.get(DcMotor.class, "lfmotor"),
-        hardwareMap.get(DcMotor.class, "lbmotor")
-      );
-      //imu
-      lastAngles = new Orientation();
-      imu = hardwareMap.get(BNO055IMU.class, "imu");
-      BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
-        parameters.mode                = BNO055IMU.SensorMode.IMU;
-        parameters.angleUnit           = BNO055IMU.AngleUnit.DEGREES;
-        parameters.accelUnit           = BNO055IMU.AccelUnit.METERS_PERSEC_PERSEC;
-        parameters.loggingEnabled      = false;
-      imu.initialize(parameters);
         telemetry.addData("Status", "Initialized");
+        //drive
+        
+        hardwareMap = hm;
+        
+        d = new Drive(
+            hardwareMap.get(DcMotor.class, "rbmotor"),
+            hardwareMap.get(DcMotor.class, "rfmotor"),
+            hardwareMap.get(DcMotor.class, "lfmotor"),
+            hardwareMap.get(DcMotor.class, "lbmotor")
+            );
+            //imu
+            
+        lastAngles = new Orientation();
+        
+        imu = hardwareMap.get(BNO055IMU.class, "imu");
+        BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
+          parameters.mode                = BNO055IMU.SensorMode.IMU;
+          parameters.angleUnit           = BNO055IMU.AngleUnit.DEGREES;
+          parameters.accelUnit           = BNO055IMU.AccelUnit.METERS_PERSEC_PERSEC;
+          parameters.loggingEnabled      = false;
+        imu.initialize(parameters);
+        theta = 0;
+        //dtheta = dtheta + theta; // setting goal angle
+        
         d.resetEncoderlf();
-        globala = 0;
+        
     }
 
     /*
@@ -102,42 +104,20 @@ public class StrafeUntilClicks extends OurState {
      */
     @Override
     public void start() {
-      // if (goal < 0) {
-      //   d.setPower(0, -1, 0, 0.4);
-      // } else {
-      //   d.setPower(0, 1, 0, 0.4);
-      // }
+
     }
 
     /*
      * Code to run REPEATEDLY after the driver hits PLAY but before they hit STOP
      */
-    
     @Override
     public void loop() {
-      current = d.getClickslf();
-      if(current > goal - ACCURACY && current < goal + ACCURACY) {
-          d.setPower(0, 0, 0, 0);
-          running = false;
-      } else if (current > goal) {
-        d.setPower(0, 1, 0, Math.abs(goal)-Math.abs(current)/Math.abs(goal) * 0.4);
-      } else if (current < goal) {
-        d.setPower(0, -1, 0, Math.abs(goal)-Math.abs(current)/Math.abs(goal) * 0.4);
+      theta = theta + getAngle();
+      d.setPower(0, 0, (dtheta - theta) / (Math.abs(dtheta - theta)), 1 );
+      if(Math.abs(theta - dtheta) < 1) { //if diff is less than 2 degrees
+        running = false;
+        d.setPower(0,0,0,0);
       }
-      
-      globala = globala + getAngle();
-      //correcting
-      // double current = getAngle();
-      double power =  -1 * (globala) / Math.abs(globala);
-      if (globala > 0.25 || globala < -0.25) {
-        d.setPower(d.getLy(), d.getLx(), power/1 , d.getTurbo());
-      } else {
-        d.setPower(d.getLy(), d.getLx(), 0, d.getTurbo());
-        globala = 0;
-      }
-      // if (globala < -1) {
-      //   d.setPower(d.getLy(), d.getLx(), power/2 , d.getTurbo());
-      // }
     }
 
     /*
@@ -147,7 +127,7 @@ public class StrafeUntilClicks extends OurState {
     public void stop() {
 
     }
-    
+
     public double getAngle() {
       //this function and the note below taken from somewhere else
 
@@ -165,15 +145,10 @@ public class StrafeUntilClicks extends OurState {
       else if (deltaAngle > 180)
           deltaAngle -= 360;
 
-      //globalAngle += deltaAngle;
+      // globalAngle += deltaAngle;
 
       lastAngles = angles;
 
       return deltaAngle;
-    }
-    
-    @Override
-    public void addToGoal(double variable) {
-      goal = goal - variable; //used with seeking
     }
 }

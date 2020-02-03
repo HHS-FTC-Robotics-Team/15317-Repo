@@ -16,8 +16,10 @@ NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FO
 DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
-package org.firstinspires.ftc.teamcode;
+package org.firstinspires.ftc.teamcode.states;
 
+import org.firstinspires.ftc.teamcode.OurState;
+import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.hardware.rev.Rev2mDistanceSensor;
 import com.qualcomm.robotcore.hardware.DistanceSensor;
@@ -29,6 +31,7 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import org.firstinspires.ftc.teamcode.Drive;
+import org.firstinspires.ftc.teamcode.Collect;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -45,20 +48,29 @@ import java.util.Date;
  */
 @Autonomous
 
-public class ForwardUntilDist extends OpMode {
+public class DispenseUntilDist extends OurState {
     /* Declare OpMode members. */
     public Collect c = null;
     public DistanceSensor dist = null;
-    public Boolean running = true;
+    
+    public double timer = 0;
+    public double timermax = 30;
+    
+    public DispenseUntilDist(){
+        super ();
+    }
+    
 
     @Override
-    public void init() {
-        telemetry.addData("Status", "Initialized");
+    public void init(HardwareMap hm) {
+        hardwareMap = hm;
         c = new Collect(
           hardwareMap.get(DcMotor.class, "col_left"),
           hardwareMap.get(DcMotor.class, "col_right"),
           hardwareMap.get(Rev2mDistanceSensor.class, "distance_sensor")
         );
+        
+        c.out(); //dont run dispense as first state b/c it will start in init
     }
 
     /*
@@ -73,7 +85,7 @@ public class ForwardUntilDist extends OpMode {
      */
     @Override
     public void start() {
-        c.out();
+        
     }
 
     /*
@@ -81,10 +93,12 @@ public class ForwardUntilDist extends OpMode {
      */
     @Override
     public void loop() {
-      if(c.getDistance > 20) {
-          c.rest();
-          //stop();
-          running = false;
+      if(c.getDistance() > 20) {
+          timer = timer + 1;
+          if (timer >= timermax) {
+              c.rest();
+              running = false;
+          }
       }
 
     }
@@ -94,6 +108,6 @@ public class ForwardUntilDist extends OpMode {
      */
     @Override
     public void stop() {
-
+        c.rest();
     }
 }

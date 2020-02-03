@@ -16,12 +16,9 @@ NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FO
 DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
-package org.firstinspires.ftc.teamcode.states;
+package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
-import com.qualcomm.robotcore.hardware.HardwareMap;
-import com.qualcomm.hardware.rev.Rev2mDistanceSensor;
-import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
@@ -29,9 +26,15 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.util.ElapsedTime;
-import org.firstinspires.ftc.teamcode.Drive;
-import org.firstinspires.ftc.teamcode.Collect;
-import org.firstinspires.ftc.teamcode.OurState;
+import org.firstinspires.ftc.teamcode.states.ForwardUntil;
+import org.firstinspires.ftc.teamcode.states.TurnUntilAngle;
+import org.firstinspires.ftc.teamcode.states.StrafeUntilClicks;
+import org.firstinspires.ftc.teamcode.states.CollectUntilDist;
+import org.firstinspires.ftc.teamcode.states.DispenseUntilDist;
+import org.firstinspires.ftc.teamcode.states.SeekUntilColor;
+import org.firstinspires.ftc.teamcode.states.GrabFoundation;
+import org.firstinspires.ftc.teamcode.states.DragFoundationR;
+
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -46,34 +49,25 @@ import java.util.Date;
  * Remove a @Disabled the on the next line or two (if present) to add this opmode to the Driver Station OpMode list,
  * or add a @Disabled annotation to prevent this OpMode from being added to the Driver Station
  */
+@Autonomous
 
-
-public class CollectUntilDist extends OurState {
+public class CollectBlock extends OpMode {
     /* Declare OpMode members. */
-    public Collect c = null;
-    public Drive d = null;
-    public DistanceSensor dist = null;
-    public CollectUntilDist(){
-        super ();
-    }
+    //public OurState states[];
+    public OurState[] states = new OurState[] {
+        new SeekUntilColor(), // x
+        new CollectUntilDist(), // y
+        new ForwardUntil(2200), //2200 + y
+        new StrafeUntilClicks(-9000), //-9000 + x
+    }; 
+    private int count = 0;
+    
+
     @Override
-    public void init(HardwareMap hm) {
-        hardwareMap = hm;
-        c = new Collect(
-          hardwareMap.get(DcMotor.class, "col_left"),
-          hardwareMap.get(DcMotor.class, "col_right"),
-          hardwareMap.get(Rev2mDistanceSensor.class, "distance_sensor")
-        );
-        d = new Drive(
-            hardwareMap.get(DcMotor.class, "rbmotor"),
-            hardwareMap.get(DcMotor.class, "rfmotor"),
-            hardwareMap.get(DcMotor.class, "lfmotor"),
-            hardwareMap.get(DcMotor.class, "lbmotor")
-            );
+    public void init() {
         telemetry.addData("Status", "Initialized");
-        
-        c.in(); //starts on init, so dont make collection first
-        d.setPower(-1, 0, 0, 0.3);
+        states[count].init(hardwareMap);
+
     }
 
     /*
@@ -81,6 +75,10 @@ public class CollectUntilDist extends OurState {
      */
     @Override
     public void init_loop() {
+        
+        // be careful with this, we probably won't use it
+        states[count].init_loop();
+
     }
 
     /*
@@ -88,7 +86,7 @@ public class CollectUntilDist extends OurState {
      */
     @Override
     public void start() {
-        
+        states[count].start();
     }
 
     /*
@@ -96,26 +94,29 @@ public class CollectUntilDist extends OurState {
      */
     @Override
     public void loop() {
-      if(c.getDistance() < 20) {
-          c.rest();
-          //stop();
-          running = false;
-          d.setPower(0, 0, 0, 0);
-      }
 
+        if(states[count].running == true) {
+            states[count].loop();
+            telemetry.addData("Status", "Running state...");
+        } else if(count < states.length - 1) {
+            double tempvariable = states[count].getVariable();
+            count += 1;
+            telemetry.addData("Status", "Initializing next state...");
+            telemetry.update();
+            states[count].init(hardwareMap);
+            states[count].addToGoal(tempvariable);
+        } else {
+            telemetry.addData("Status", "Done");
+        }
     }
-
+    
+    
+    
     /*
      * Code to run ONCE after the driver hits STOP
      */
     @Override
     public void stop() {
-        c.rest();
-        d.setPower(0, 0, 0, 0);
-    }
-    
-    @Override
-    public double getVariable() {
-        return d.getClickslf();
+        states[count].stop();
     }
 }

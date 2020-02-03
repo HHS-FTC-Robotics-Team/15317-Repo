@@ -20,19 +20,19 @@ public class Collect extends LinearOpMode {
     Rmtr = r;
     //direction for one is reversed so that
     //the collectors can suck bricks in and out
-    Lmtr.setDirection(DcMotor.Direction.FORWARD);
-    Rmtr.setDirection(DcMotor.Direction.REVERSE);
+    Lmtr.setDirection(DcMotor.Direction.REVERSE);
+    Rmtr.setDirection(DcMotor.Direction.FORWARD);
     dist = d;
   }
 
   public void in() {
-    Lmtr.setPower(0.8);
-    Rmtr.setPower(0.8);
+    Lmtr.setPower(1);
+    Rmtr.setPower(1);
   }
 
   public void out() {
-    Lmtr.setPower(-0.8);
-    Rmtr.setPower(-0.8);
+    Lmtr.setPower(-1);
+    Rmtr.setPower(-1);
   }
 
   public void rest() {

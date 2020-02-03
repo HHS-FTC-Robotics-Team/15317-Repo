@@ -1,15 +1,12 @@
 /*
 Copyright 2020 FIRST Tech Challenge Team 15317
-
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
 associated documentation files (the "Software"), to deal in the Software without restriction,
 including without limitation the rights to use, copy, modify, merge, publish, distribute,
 sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is
 furnished to do so, subject to the following conditions:
-
 The above copyright notice and this permission notice shall be included in all copies or substantial
 portions of the Software.
-
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT
 NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
 NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
@@ -18,10 +15,15 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SO
 */
 package org.firstinspires.ftc.teamcode.states;
 
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
+
+import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.hardware.rev.Rev2mDistanceSensor;
-import com.qualcomm.robotcore.hardware.DistanceSensor;
+import com.qualcomm.robotcore.hardware.Servo;
+import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
+import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
@@ -30,11 +32,9 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import org.firstinspires.ftc.teamcode.Drive;
-import org.firstinspires.ftc.teamcode.Collect;
-import org.firstinspires.ftc.teamcode.OurState;
-
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import org.firstinspires.ftc.teamcode.OurState;
 
 /**
  * This file contains an example of an iterative (Non-Linear) "OpMode".
@@ -46,34 +46,35 @@ import java.util.Date;
  * Remove a @Disabled the on the next line or two (if present) to add this opmode to the Driver Station OpMode list,
  * or add a @Disabled annotation to prevent this OpMode from being added to the Driver Station
  */
+@Autonomous
 
-
-public class CollectUntilDist extends OurState {
+public class GrabFoundation extends OurState {
     /* Declare OpMode members. */
-    public Collect c = null;
     public Drive d = null;
-    public DistanceSensor dist = null;
-    public CollectUntilDist(){
+    private Servo f = null;
+    private double lmax = .21;
+    private double lmin = .7;
+    private double lmid = .5;
+    private double goal = lmin;
+    
+    public GrabFoundation(){
         super ();
     }
+    
     @Override
     public void init(HardwareMap hm) {
         hardwareMap = hm;
-        c = new Collect(
-          hardwareMap.get(DcMotor.class, "col_left"),
-          hardwareMap.get(DcMotor.class, "col_right"),
-          hardwareMap.get(Rev2mDistanceSensor.class, "distance_sensor")
-        );
+        telemetry.addData("Status", "Initialized");
         d = new Drive(
             hardwareMap.get(DcMotor.class, "rbmotor"),
             hardwareMap.get(DcMotor.class, "rfmotor"),
             hardwareMap.get(DcMotor.class, "lfmotor"),
             hardwareMap.get(DcMotor.class, "lbmotor")
             );
-        telemetry.addData("Status", "Initialized");
+        f = hardwareMap.get(Servo.class, "foundation");
+        d.resetEncoderlf();
         
-        c.in(); //starts on init, so dont make collection first
-        d.setPower(-1, 0, 0, 0.3);
+        f.setPosition(lmax);
     }
 
     /*
@@ -96,13 +97,20 @@ public class CollectUntilDist extends OurState {
      */
     @Override
     public void loop() {
-      if(c.getDistance() < 20) {
-          c.rest();
-          //stop();
-          running = false;
-          d.setPower(0, 0, 0, 0);
-      }
-
+        if (running) {
+            double error = 0.09;
+            double increment = 0.07;
+            double pos1 = f.getPosition();
+            if (pos1 > goal - error && pos1 < goal + error) {
+              pos1 = goal;
+              running = false;
+            } else if (pos1 > goal) {
+              pos1 -= increment;
+            } else if (pos1 < goal){
+              pos1 += increment;
+            }
+            f.setPosition(pos1);
+        }
     }
 
     /*
@@ -110,12 +118,7 @@ public class CollectUntilDist extends OurState {
      */
     @Override
     public void stop() {
-        c.rest();
-        d.setPower(0, 0, 0, 0);
+
     }
-    
-    @Override
-    public double getVariable() {
-        return d.getClickslf();
-    }
+
 }

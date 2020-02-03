@@ -1,15 +1,12 @@
 /*
 Copyright 2020 FIRST Tech Challenge Team 15317
-
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
 associated documentation files (the "Software"), to deal in the Software without restriction,
 including without limitation the rights to use, copy, modify, merge, publish, distribute,
 sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is
 furnished to do so, subject to the following conditions:
-
 The above copyright notice and this permission notice shall be included in all copies or substantial
 portions of the Software.
-
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT
 NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
 NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
@@ -18,10 +15,10 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SO
 */
 package org.firstinspires.ftc.teamcode.states;
 
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
+import org.firstinspires.ftc.teamcode.OurState;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.hardware.rev.Rev2mDistanceSensor;
-import com.qualcomm.robotcore.hardware.DistanceSensor;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
@@ -30,8 +27,9 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import org.firstinspires.ftc.teamcode.Drive;
-import org.firstinspires.ftc.teamcode.Collect;
-import org.firstinspires.ftc.teamcode.OurState;
+import com.qualcomm.robotcore.hardware.ColorSensor;
+import android.graphics.Color;
+
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -46,34 +44,31 @@ import java.util.Date;
  * Remove a @Disabled the on the next line or two (if present) to add this opmode to the Driver Station OpMode list,
  * or add a @Disabled annotation to prevent this OpMode from being added to the Driver Station
  */
+@Autonomous
 
-
-public class CollectUntilDist extends OurState {
+public class SeekUntilColor extends OurState {
     /* Declare OpMode members. */
-    public Collect c = null;
     public Drive d = null;
-    public DistanceSensor dist = null;
-    public CollectUntilDist(){
-        super ();
+    //colorsensor
+    public ColorSensor color = null;
+    float hsvValues[] = {0F,0F,0F};
+    
+    public SeekUntilColor(){
+      super ();
+      
     }
+    
     @Override
     public void init(HardwareMap hm) {
-        hardwareMap = hm;
-        c = new Collect(
-          hardwareMap.get(DcMotor.class, "col_left"),
-          hardwareMap.get(DcMotor.class, "col_right"),
-          hardwareMap.get(Rev2mDistanceSensor.class, "distance_sensor")
-        );
-        d = new Drive(
-            hardwareMap.get(DcMotor.class, "rbmotor"),
-            hardwareMap.get(DcMotor.class, "rfmotor"),
-            hardwareMap.get(DcMotor.class, "lfmotor"),
-            hardwareMap.get(DcMotor.class, "lbmotor")
-            );
-        telemetry.addData("Status", "Initialized");
-        
-        c.in(); //starts on init, so dont make collection first
-        d.setPower(-1, 0, 0, 0.3);
+      hardwareMap = hm;
+      d = new Drive(
+          hardwareMap.get(DcMotor.class, "rbmotor"),
+          hardwareMap.get(DcMotor.class, "rfmotor"),
+          hardwareMap.get(DcMotor.class, "lfmotor"),
+          hardwareMap.get(DcMotor.class, "lbmotor")
+      );
+      d.resetEncoderlf();
+      color = hardwareMap.get(ColorSensor.class, "colorsensor");
     }
 
     /*
@@ -88,21 +83,25 @@ public class CollectUntilDist extends OurState {
      */
     @Override
     public void start() {
-        
+      d.setPower(0, -1, 0, 1);
     }
 
     /*
      * Code to run REPEATEDLY after the driver hits PLAY but before they hit STOP
      */
+    
     @Override
     public void loop() {
-      if(c.getDistance() < 20) {
-          c.rest();
-          //stop();
-          running = false;
-          d.setPower(0, 0, 0, 0);
+      if (running) {
+        Color.RGBToHSV(color.red()*8, color.green()*8, color.blue()*8, hsvValues);
+        if(hsvValues[0] > 100) {
+            d.setPower(0, 0, 0, 0);
+            running = false;
+        } else {
+          d.setPower(0, -1, 0, 1);
+        }
       }
-
+      
     }
 
     /*
@@ -110,12 +109,13 @@ public class CollectUntilDist extends OurState {
      */
     @Override
     public void stop() {
-        c.rest();
-        d.setPower(0, 0, 0, 0);
+      d.setPower(0, 0, 0, 0);
     }
     
     @Override
     public double getVariable() {
         return d.getClickslf();
     }
+
+
 }

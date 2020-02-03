@@ -16,12 +16,9 @@ NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FO
 DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
-package org.firstinspires.ftc.teamcode.states;
+package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
-import com.qualcomm.robotcore.hardware.HardwareMap;
-import com.qualcomm.hardware.rev.Rev2mDistanceSensor;
-import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
@@ -29,9 +26,14 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.util.ElapsedTime;
-import org.firstinspires.ftc.teamcode.Drive;
-import org.firstinspires.ftc.teamcode.Collect;
-import org.firstinspires.ftc.teamcode.OurState;
+import org.firstinspires.ftc.teamcode.states.ForwardUntil;
+import org.firstinspires.ftc.teamcode.states.TurnUntilAngle;
+import org.firstinspires.ftc.teamcode.states.StrafeUntilClicks;
+import org.firstinspires.ftc.teamcode.states.CollectUntilDist;
+import org.firstinspires.ftc.teamcode.states.DispenseUntilDist;
+import org.firstinspires.ftc.teamcode.states.SeekUntilColor;
+import org.firstinspires.ftc.teamcode.states.GrabFoundation;
+import org.firstinspires.ftc.teamcode.states.DragFoundationR;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -46,34 +48,38 @@ import java.util.Date;
  * Remove a @Disabled the on the next line or two (if present) to add this opmode to the Driver Station OpMode list,
  * or add a @Disabled annotation to prevent this OpMode from being added to the Driver Station
  */
-
-
-public class CollectUntilDist extends OurState {
+@Autonomous
+public class Auto15 extends OpMode {
     /* Declare OpMode members. */
-    public Collect c = null;
-    public Drive d = null;
-    public DistanceSensor dist = null;
-    public CollectUntilDist(){
-        super ();
-    }
+    public LinearStack states = new LinearStack(new OurState[] {
+            // Phase 1
+            //new ForwardUntil(1000),
+            // new TurnUntilAngle(180),
+            // new ForwardUntil(-1000),
+            new SeekUntilColor(),
+            new LinearStack(new OurState[] {
+                    new CollectUntilDist(),
+                    new ForwardUntil(1),
+                    new StrafeUntilClicks(-1)
+                })
+            // new CollectUntilDist(),
+            // new ForwardUntil(1),
+                
+            // Phase 2
+            // new StrafeUntilClicks(-9000), //-9000 + x,
+            //new DispenseUntilDist(),
+            //new TurnUntilAngle(180),
+           // new StrafeUntilClicks(3000),
+            //new ForwardUntil(1500),
+            //new GrabFoundation(),
+            //new DragFoundationR(-180),
+        }
+    );
+
     @Override
-    public void init(HardwareMap hm) {
-        hardwareMap = hm;
-        c = new Collect(
-          hardwareMap.get(DcMotor.class, "col_left"),
-          hardwareMap.get(DcMotor.class, "col_right"),
-          hardwareMap.get(Rev2mDistanceSensor.class, "distance_sensor")
-        );
-        d = new Drive(
-            hardwareMap.get(DcMotor.class, "rbmotor"),
-            hardwareMap.get(DcMotor.class, "rfmotor"),
-            hardwareMap.get(DcMotor.class, "lfmotor"),
-            hardwareMap.get(DcMotor.class, "lbmotor")
-            );
+    public void init() {
         telemetry.addData("Status", "Initialized");
-        
-        c.in(); //starts on init, so dont make collection first
-        d.setPower(-1, 0, 0, 0.3);
+        states.init(hardwareMap);
     }
 
     /*
@@ -81,6 +87,7 @@ public class CollectUntilDist extends OurState {
      */
     @Override
     public void init_loop() {
+        states.init_loop();
     }
 
     /*
@@ -88,7 +95,7 @@ public class CollectUntilDist extends OurState {
      */
     @Override
     public void start() {
-        
+        states.start();
     }
 
     /*
@@ -96,12 +103,7 @@ public class CollectUntilDist extends OurState {
      */
     @Override
     public void loop() {
-      if(c.getDistance() < 20) {
-          c.rest();
-          //stop();
-          running = false;
-          d.setPower(0, 0, 0, 0);
-      }
+        states.loop();
 
     }
 
@@ -110,12 +112,6 @@ public class CollectUntilDist extends OurState {
      */
     @Override
     public void stop() {
-        c.rest();
-        d.setPower(0, 0, 0, 0);
-    }
-    
-    @Override
-    public double getVariable() {
-        return d.getClickslf();
+        states.stop();
     }
 }

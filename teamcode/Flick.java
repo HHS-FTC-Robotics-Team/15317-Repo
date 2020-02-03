@@ -30,7 +30,7 @@ public class Flick extends LinearOpMode {
       pos1 -= increment;
     } else if (pos1 < goal){
       pos1 += increment;
-    } else if (pos1 < goal - error && pos1 > goal + error) {
+    } else if (pos1 < goal - error && pos1 > goal + error) { //also these signs are backwards
       pos1 = goal;
     }
     servo.setPosition(pos1);
