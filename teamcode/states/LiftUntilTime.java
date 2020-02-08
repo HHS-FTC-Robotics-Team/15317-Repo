@@ -16,9 +16,11 @@ NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FO
 DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
-package org.firstinspires.ftc.teamcode;
+package org.firstinspires.ftc.teamcode.states;
 
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
+import com.qualcomm.robotcore.hardware.HardwareMap;
+import org.firstinspires.ftc.robotcore.external.State;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
@@ -26,15 +28,9 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.util.ElapsedTime;
-import org.firstinspires.ftc.teamcode.states.ForwardUntil;
-import org.firstinspires.ftc.teamcode.states.TurnUntilAngle;
-import org.firstinspires.ftc.teamcode.states.StrafeUntilClicks;
-import org.firstinspires.ftc.teamcode.states.CollectUntilDist;
-import org.firstinspires.ftc.teamcode.states.DispenseUntilDist;
-import org.firstinspires.ftc.teamcode.states.SeekUntilColor;
-import org.firstinspires.ftc.teamcode.states.GrabFoundation;
-import org.firstinspires.ftc.teamcode.states.DragFoundationR;
-import org.firstinspires.ftc.teamcode.states.LiftUntilTime;
+import org.firstinspires.ftc.teamcode.Drive;
+import org.firstinspires.ftc.teamcode.OurState;
+
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -49,36 +45,27 @@ import java.util.Date;
  * Remove a @Disabled the on the next line or two (if present) to add this opmode to the Driver Station OpMode list,
  * or add a @Disabled annotation to prevent this OpMode from being added to the Driver Station
  */
-@Autonomous
-public class Auto15 extends OpMode {
+
+public class LiftUntilTime extends OurState {
     /* Declare OpMode members. */
-    public LinearStack states = new LinearStack(new OurState[] {
-            // Phase 1
-            // new LiftUntilTime(120, -1),
-            new ForwardUntil(1000),
-            new TurnUntilAngle(180),
-            new ForwardUntil(-1000),
-            new SeekUntilColor(),
-            new LinearStack(new OurState[] {
-                new CollectUntilDist(),
-                new ForwardUntil(2200), // + y
-                new StrafeUntilClicks(-9000) // + x
-            }),
-                
-            // Phase 2
-            new DispenseUntilDist(),
-            new TurnUntilAngle(180),
-            new StrafeUntilClicks(3000),
-            new ForwardUntil(3000),
-            new GrabFoundation(),
-            new DragFoundationR(-180),
-        }
-    );
+    public double goal = 0;
+    public double time = 0;
+    public double power = 0; //down = 0.6, up = -1
+    public DcMotor motor = null;
+
+    //@Override
+    public LiftUntilTime(double g, double p) {
+        super();
+        goal = g;
+        power = p;
+    }
 
     @Override
-    public void init() {
+    public void init(HardwareMap hm) {
         telemetry.addData("Status", "Initialized");
-        states.init(hardwareMap);
+        hardwareMap = hm;
+        motor = hardwareMap.get(DcMotor.class, "liftmotor");
+        motor.setDirection(DcMotor.Direction.REVERSE);
     }
 
     /*
@@ -86,7 +73,6 @@ public class Auto15 extends OpMode {
      */
     @Override
     public void init_loop() {
-        states.init_loop();
     }
 
     /*
@@ -94,7 +80,7 @@ public class Auto15 extends OpMode {
      */
     @Override
     public void start() {
-        states.start();
+      
     }
 
     /*
@@ -102,7 +88,14 @@ public class Auto15 extends OpMode {
      */
     @Override
     public void loop() {
-        states.loop();
+      
+      if (time < goal) {
+        time = time + 1;
+        motor.setPower(power); //down
+      } else if (time >= goal) {
+        motor.setPower(0); //up
+        running = false;
+      }
 
     }
 
@@ -111,6 +104,11 @@ public class Auto15 extends OpMode {
      */
     @Override
     public void stop() {
-        states.stop();
+      
+    }
+    
+    @Override
+    public void addToGoal(double variable) {
+      goal = goal - variable;
     }
 }

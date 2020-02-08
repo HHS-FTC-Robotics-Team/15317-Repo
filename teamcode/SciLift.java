@@ -29,7 +29,7 @@ public class SciLift extends LinearOpMode {
   public void down() {
     motor.setPower(0.6);
   }
-
+  
   public void up(float power) {
     motor.setPower(-1 * power);
   }

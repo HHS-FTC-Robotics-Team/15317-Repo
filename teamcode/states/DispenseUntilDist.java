@@ -54,7 +54,7 @@ public class DispenseUntilDist extends OurState {
     public DistanceSensor dist = null;
     
     public double timer = 0;
-    public double timermax = 30;
+    public double timermax = 17;
     
     public DispenseUntilDist(){
         super ();

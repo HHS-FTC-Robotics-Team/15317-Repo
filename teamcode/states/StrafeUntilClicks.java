@@ -120,9 +120,9 @@ public class StrafeUntilClicks extends OurState {
           d.setPower(0, 0, 0, 0);
           running = false;
       } else if (current > goal) {
-        d.setPower(0, 1, 0, Math.abs(goal)-Math.abs(current)/Math.abs(goal) * 0.4);
+        d.setPower(0, 0.5, 0, Math.abs(goal)-Math.abs(current)/Math.abs(goal) * 0.4);
       } else if (current < goal) {
-        d.setPower(0, -1, 0, Math.abs(goal)-Math.abs(current)/Math.abs(goal) * 0.4);
+        d.setPower(0, -0.5, 0, Math.abs(goal)-Math.abs(current)/Math.abs(goal) * 0.4);
       }
       
       globala = globala + getAngle();
@@ -130,7 +130,7 @@ public class StrafeUntilClicks extends OurState {
       // double current = getAngle();
       double power =  -1 * (globala) / Math.abs(globala);
       if (globala > 0.25 || globala < -0.25) {
-        d.setPower(d.getLy(), d.getLx(), power/1 , d.getTurbo());
+        d.setPower(d.getLy(), d.getLx(), power/2 , d.getTurbo());
       } else {
         d.setPower(d.getLy(), d.getLx(), 0, d.getTurbo());
         globala = 0;

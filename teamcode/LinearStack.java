@@ -126,16 +126,14 @@ public class LinearStack extends OurState {
 
         if(states[count].running == true) {
             states[count].loop();
-            // telemetry.addData("Status", "Running state...");
         } else if(count < states.length - 1) {
+            //go to next state and input the last state's output
             double tempvariable = states[count].getVariable();
             count += 1;
-            // telemetry.addData("Status", "Initializing next state...");
-            // telemetry.updat/e();
             states[count].init(hardwareMap);
             states[count].addToGoal(tempvariable);
         } else {
-            // telemetry.addData("Status", "Done");
+            running = false;
         }
     }
 
