@@ -40,6 +40,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import org.firstinspires.ftc.teamcode.RobotHardware;
 
 /**
  * This file contains an example of an iterative (Non-Linear) "OpMode".
@@ -57,48 +58,31 @@ public class DragFoundationR extends OurState {
     /* Declare OpMode members. */
     public Drive d = null;
     private BNO055IMU imu = null;
+    public RobotHardware robotHardware = null;
     double theta = 0;
-    double dtheta = 90;
-    private Orientation lastAngles = null;
-    private double globalAngle, power = .30, correction;
-    private Servo left = null;
-    private double lmax = .21; // up
-    private double lmin = .7; //down
+    double dtheta = 0;
+    
+    private double lmax = .21; // Maximum rotational position
+    private double lmin = .7; // Minimum rotational position
     private double lmid = .5;
+    
     private double servogoal = lmin;
     private Servo f = null;
-    private double anglegoal = 0;
+    
     
     public DragFoundationR(double a){
         super ();
-        anglegoal = a;
+        dtheta = a;
     }
     
     
-    @Override
-    public void init(HardwareMap hm) {
-        hardwareMap = hm;
-        d = new Drive(
-            hardwareMap.get(DcMotor.class, "rbmotor"),
-            hardwareMap.get(DcMotor.class, "rfmotor"),
-            hardwareMap.get(DcMotor.class, "lfmotor"),
-            hardwareMap.get(DcMotor.class, "lbmotor")
-            );
+    
+    public void init(RobotHardware r) {
+        robotHardware = r;
+        d = robotHardware.d;
         //imu
-        lastAngles = new Orientation();
-        imu = hardwareMap.get(BNO055IMU.class, "imu");
-        BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
-          parameters.mode                = BNO055IMU.SensorMode.IMU;
-          parameters.angleUnit           = BNO055IMU.AngleUnit.DEGREES;
-          parameters.accelUnit           = BNO055IMU.AccelUnit.METERS_PERSEC_PERSEC;
-          parameters.loggingEnabled      = false;
-        imu.initialize(parameters);
-        
-        f = hardwareMap.get(Servo.class, "foundation");
-        telemetry.addData("Status", "Initialized");
-        d.resetEncoderlf();
-        theta = getAngle();
-        dtheta = anglegoal + theta;
+        imu = robotHardware.imu;
+        f = robotHardware.f;
     }
 
     /*
@@ -121,20 +105,15 @@ public class DragFoundationR extends OurState {
      */
     @Override
     public void loop() {
-      if(running) {
         f.setPosition(servogoal);
-        theta = getAngle();
+        theta = theta + robotHardware.updateGlobalAngle();
         d.setPower(0, 0, (dtheta - theta) / (Math.abs(dtheta - theta)) , 0.6);
-        if(Math.abs(theta - dtheta) < 2) { //if diff is less than 2 degrees
+        if(Math.abs(theta - dtheta) < 1) { //if diff is less than 2 degrees
           running = false;
           d.setPower(0,0,0,0);
-          this.stop();
+          f.setPosition(lmax);
         }
-      } else {
-        f.setPosition(lmax);
-      }
     }
-
     /*
      * Code to run ONCE after the driver hits STOP
      */
@@ -143,27 +122,4 @@ public class DragFoundationR extends OurState {
 
     }
 
-    public double getAngle() {
-      //this function and the note below taken from somewhere else
-
-      // We experimentally determined the Z axis is the axis we want to use for heading angle.
-      // We have to process the angle because the imu works in euler angles so the Z axis is
-      // returned as 0 to +180 or 0 to -180 rolling back to -179 or +179 when rotation passes
-      // 180 degrees. We detect this transition and track the total cumulative angle of rotation.
-
-      Orientation angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
-
-      double deltaAngle = angles.firstAngle - lastAngles.firstAngle;
-
-      if (deltaAngle < -180)
-          deltaAngle += 360;
-      else if (deltaAngle > 180)
-          deltaAngle -= 360;
-
-      globalAngle += deltaAngle;
-
-      lastAngles = angles;
-
-      return globalAngle;
-    }
 }

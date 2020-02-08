@@ -32,6 +32,7 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import org.firstinspires.ftc.teamcode.Drive;
 import org.firstinspires.ftc.teamcode.Collect;
+import org.firstinspires.ftc.teamcode.RobotHardware;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -53,6 +54,8 @@ public class DispenseUntilDist extends OurState {
     public Collect c = null;
     public DistanceSensor dist = null;
     
+    public RobotHardware robotHardware = null;
+    
     public double timer = 0;
     public double timermax = 17;
     
@@ -61,14 +64,10 @@ public class DispenseUntilDist extends OurState {
     }
     
 
-    @Override
-    public void init(HardwareMap hm) {
-        hardwareMap = hm;
-        c = new Collect(
-          hardwareMap.get(DcMotor.class, "col_left"),
-          hardwareMap.get(DcMotor.class, "col_right"),
-          hardwareMap.get(Rev2mDistanceSensor.class, "distance_sensor")
-        );
+    
+    public void init(RobotHardware r) {
+        robotHardware = r;
+        c = robotHardware.c;
         
         c.out(); //dont run dispense as first state b/c it will start in init
     }

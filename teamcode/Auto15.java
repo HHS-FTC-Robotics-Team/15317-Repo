@@ -35,6 +35,7 @@ import org.firstinspires.ftc.teamcode.states.SeekUntilColor;
 import org.firstinspires.ftc.teamcode.states.GrabFoundation;
 import org.firstinspires.ftc.teamcode.states.DragFoundationR;
 import org.firstinspires.ftc.teamcode.states.LiftUntilTime;
+import org.firstinspires.ftc.teamcode.RobotHardware;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -52,24 +53,25 @@ import java.util.Date;
 @Autonomous
 public class Auto15 extends OpMode {
     /* Declare OpMode members. */
+    public RobotHardware robotHardware = new RobotHardware();
     public LinearStack states = new LinearStack(new OurState[] {
             // Phase 1
             // new LiftUntilTime(120, -1),
-            new ForwardUntil(1000),
-            new TurnUntilAngle(180),
-            new ForwardUntil(-1000),
-            new SeekUntilColor(),
-            new LinearStack(new OurState[] {
-                new CollectUntilDist(),
-                new ForwardUntil(2200), // + y
-                new StrafeUntilClicks(-9000) // + x
-            }),
+            // new ForwardUntil(1000),
+            // new TurnUntilAngle(180),
+            // new ForwardUntil(-900),
+            // new SeekUntilColor(),
+            // new LinearStack(new OurState[] {
+            //     new CollectUntilDist(),
+            //     new ForwardUntil(2200), // + y
+            //     new StrafeUntilClicks(-9000) // + x
+            // }),
                 
             // Phase 2
-            new DispenseUntilDist(),
-            new TurnUntilAngle(180),
-            new StrafeUntilClicks(3000),
-            new ForwardUntil(3000),
+            // new DispenseUntilDist(),
+            // new TurnUntilAngle(180),
+            // new StrafeUntilClicks(3000),
+            // new ForwardUntil(3000),
             new GrabFoundation(),
             new DragFoundationR(-180),
         }
@@ -77,8 +79,9 @@ public class Auto15 extends OpMode {
 
     @Override
     public void init() {
+        robotHardware.build(hardwareMap);
         telemetry.addData("Status", "Initialized");
-        states.init(hardwareMap);
+        states.init(robotHardware);
     }
 
     /*

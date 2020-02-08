@@ -17,6 +17,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SO
 package org.firstinspires.ftc.teamcode.states;
 
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
+import com.qualcomm.robotcore.robot.Robot;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
@@ -35,7 +36,7 @@ import org.firstinspires.ftc.teamcode.Drive;
 import java.text.SimpleDateFormat;
 import org.firstinspires.ftc.teamcode.OurState;
 import java.util.Date;
-
+import org.firstinspires.ftc.teamcode.RobotHardware;
 /**
  * This file contains an example of an iterative (Non-Linear) "OpMode".
  * An OpMode is a 'program' that runs in either the autonomous or the teleop period of an FTC match.
@@ -51,44 +52,21 @@ public class TurnUntilAngle extends OurState {
     /* Declare OpMode members. */
     public Drive d = null;
     private BNO055IMU imu = null;
-    double theta = 0;
-    double dtheta = 90;
-    private Orientation lastAngles = null; // new Orientation();
-    private double globalAngle, power = .30, correction;
+    public double goalangle = 0;
+    public double theta = 0;
     
-    public TurnUntilAngle(double goalangle) {
+    public TurnUntilAngle(double g) {
       super();
-      dtheta = goalangle;
+      goalangle = g;
 
     }
     
-    public void init(HardwareMap hm) {
+    public void init(RobotHardware r) {
         telemetry.addData("Status", "Initialized");
-        //drive
         
-        hardwareMap = hm;
-        
-        d = new Drive(
-            hardwareMap.get(DcMotor.class, "rbmotor"),
-            hardwareMap.get(DcMotor.class, "rfmotor"),
-            hardwareMap.get(DcMotor.class, "lfmotor"),
-            hardwareMap.get(DcMotor.class, "lbmotor")
-            );
-            //imu
-            
-        lastAngles = new Orientation();
-        
-        imu = hardwareMap.get(BNO055IMU.class, "imu");
-        BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
-          parameters.mode                = BNO055IMU.SensorMode.IMU;
-          parameters.angleUnit           = BNO055IMU.AngleUnit.DEGREES;
-          parameters.accelUnit           = BNO055IMU.AccelUnit.METERS_PERSEC_PERSEC;
-          parameters.loggingEnabled      = false;
-        imu.initialize(parameters);
-        theta = 0;
-        //dtheta = dtheta + theta; // setting goal angle
-        
-        d.resetEncoderlf();
+        robotHardware = r;
+        d = robotHardware.d;
+        imu = robotHardware.imu;
         
     }
 
@@ -112,9 +90,9 @@ public class TurnUntilAngle extends OurState {
      */
     @Override
     public void loop() {
-      theta = theta + getAngle();
-      d.setPower(0, 0, (dtheta - theta) / (Math.abs(dtheta - theta)), 1 );
-      if(Math.abs(theta - dtheta) < 1) { //if diff is less than 2 degrees
+      theta = robotHardware.updateGlobalAngle();
+      d.setPower(0, 0, (goalangle - theta) / (Math.abs(goalangle - theta)), 1 );
+      if(Math.abs(theta - goalangle) < 1) { //if diff is less than 2 degrees
         running = false;
         d.setPower(0,0,0,0);
       }
@@ -128,27 +106,5 @@ public class TurnUntilAngle extends OurState {
 
     }
 
-    public double getAngle() {
-      //this function and the note below taken from somewhere else
-
-      // We experimentally determined the Z axis is the axis we want to use for heading angle.
-      // We have to process the angle because the imu works in euler angles so the Z axis is
-      // returned as 0 to +180 or 0 to -180 rolling back to -179 or +179 when rotation passes
-      // 180 degrees. We detect this transition and track the total cumulative angle of rotation.
-
-      Orientation angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
-
-      double deltaAngle = angles.firstAngle - lastAngles.firstAngle;
-
-      if (deltaAngle < -180)
-          deltaAngle += 360;
-      else if (deltaAngle > 180)
-          deltaAngle -= 360;
-
-      // globalAngle += deltaAngle;
-
-      lastAngles = angles;
-
-      return deltaAngle;
-    }
+    
 }

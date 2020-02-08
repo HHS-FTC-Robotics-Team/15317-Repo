@@ -31,6 +31,7 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import org.firstinspires.ftc.teamcode.Drive;
 import org.firstinspires.ftc.teamcode.OurState;
+import org.firstinspires.ftc.teamcode.RobotHardware;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -54,11 +55,10 @@ public class StrafeUntilClicks extends OurState {
     public double goal = 0;
     public double current = 0;
     private static double ACCURACY = 100;
-    //imu
     private BNO055IMU imu = null;
-    double globala = 0;
-    private Orientation lastAngles = null;
-    private double globalAngle, power = .30, correction;
+    public double globala = 0;
+    public RobotHardware robotHardware = null;
+    
     
     public StrafeUntilClicks(int g) {
       super();
@@ -67,27 +67,11 @@ public class StrafeUntilClicks extends OurState {
     }
     
     
-    @Override
-    public void init(HardwareMap hm) {
-        hardwareMap = hm;
-        d = new Drive(
-        hardwareMap.get(DcMotor.class, "rbmotor"),
-        hardwareMap.get(DcMotor.class, "rfmotor"),
-        hardwareMap.get(DcMotor.class, "lfmotor"),
-        hardwareMap.get(DcMotor.class, "lbmotor")
-      );
-      //imu
-      lastAngles = new Orientation();
-      imu = hardwareMap.get(BNO055IMU.class, "imu");
-      BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
-        parameters.mode                = BNO055IMU.SensorMode.IMU;
-        parameters.angleUnit           = BNO055IMU.AngleUnit.DEGREES;
-        parameters.accelUnit           = BNO055IMU.AccelUnit.METERS_PERSEC_PERSEC;
-        parameters.loggingEnabled      = false;
-      imu.initialize(parameters);
-        telemetry.addData("Status", "Initialized");
-        d.resetEncoderlf();
-        globala = 0;
+    
+    public void init(RobotHardware r) {
+        robotHardware = r;
+        d = robotHardware.d;
+        imu = robotHardware.imu;
     }
 
     /*
@@ -125,7 +109,7 @@ public class StrafeUntilClicks extends OurState {
         d.setPower(0, -0.5, 0, Math.abs(goal)-Math.abs(current)/Math.abs(goal) * 0.4);
       }
       
-      globala = globala + getAngle();
+      globala = robotHardware.updateGlobalAngle();
       //correcting
       // double current = getAngle();
       double power =  -1 * (globala) / Math.abs(globala);
@@ -148,29 +132,6 @@ public class StrafeUntilClicks extends OurState {
 
     }
     
-    public double getAngle() {
-      //this function and the note below taken from somewhere else
-
-      // We experimentally determined the Z axis is the axis we want to use for heading angle.
-      // We have to process the angle because the imu works in euler angles so the Z axis is
-      // returned as 0 to +180 or 0 to -180 rolling back to -179 or +179 when rotation passes
-      // 180 degrees. We detect this transition and track the total cumulative angle of rotation.
-
-      Orientation angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
-
-      double deltaAngle = angles.firstAngle - lastAngles.firstAngle;
-
-      if (deltaAngle < -180)
-          deltaAngle += 360;
-      else if (deltaAngle > 180)
-          deltaAngle -= 360;
-
-      //globalAngle += deltaAngle;
-
-      lastAngles = angles;
-
-      return deltaAngle;
-    }
     
     @Override
     public void addToGoal(double variable) {

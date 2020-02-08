@@ -35,6 +35,7 @@ import org.firstinspires.ftc.teamcode.Drive;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import org.firstinspires.ftc.teamcode.OurState;
+import org.firstinspires.ftc.teamcode.RobotHardware;
 
 /**
  * This file contains an example of an iterative (Non-Linear) "OpMode".
@@ -52,6 +53,7 @@ public class GrabFoundation extends OurState {
     /* Declare OpMode members. */
     public Drive d = null;
     private Servo f = null;
+    public RobotHardware robotHardware = null;
     private double lmax = .21;
     private double lmin = .7;
     private double lmid = .5;
@@ -61,18 +63,12 @@ public class GrabFoundation extends OurState {
         super ();
     }
     
-    @Override
-    public void init(HardwareMap hm) {
-        hardwareMap = hm;
+    
+    public void init(RobotHardware r) {
+        robotHardware = r;
         telemetry.addData("Status", "Initialized");
-        d = new Drive(
-            hardwareMap.get(DcMotor.class, "rbmotor"),
-            hardwareMap.get(DcMotor.class, "rfmotor"),
-            hardwareMap.get(DcMotor.class, "lfmotor"),
-            hardwareMap.get(DcMotor.class, "lbmotor")
-            );
-        f = hardwareMap.get(Servo.class, "foundation");
-        d.resetEncoderlf();
+        d = robotHardware.d;
+        f = robotHardware.f;
         
         f.setPosition(lmax);
     }

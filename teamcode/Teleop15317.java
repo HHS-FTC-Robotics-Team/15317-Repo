@@ -114,8 +114,8 @@ public class Teleop15317 extends LinearOpMode {
         }
 
         if (gamepad2.x) { //the full flick, flickjr, claw process
-          flick.setPos(0.0);
-          if (flick.getPos() < 0.05) {
+          flick.setPos(0.23);
+          if (flick.getPos() < 0.27) {
             flickjr.setPos(0.2);
             if (flickjr.getPos() < 0.25) {
               claw.grab();

@@ -24,7 +24,7 @@ public class FlickJr extends LinearOpMode {
 
   public void setPos(double goal) {
     double error = 0.05;
-    double increment = 0.07;
+    double increment = 0.06;
     double pos1 = servo.getPosition();
     if (pos1 > goal) {
       pos1 -= increment;

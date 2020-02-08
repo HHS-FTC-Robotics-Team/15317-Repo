@@ -30,6 +30,7 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import org.firstinspires.ftc.teamcode.Drive;
 import org.firstinspires.ftc.teamcode.OurState;
+import org.firstinspires.ftc.teamcode.RobotHardware;
 
 
 import java.text.SimpleDateFormat;
@@ -52,6 +53,7 @@ public class LiftUntilTime extends OurState {
     public double time = 0;
     public double power = 0; //down = 0.6, up = -1
     public DcMotor motor = null;
+    public RobotHardware robotHardware = null;
 
     //@Override
     public LiftUntilTime(double g, double p) {
@@ -60,11 +62,11 @@ public class LiftUntilTime extends OurState {
         power = p;
     }
 
-    @Override
-    public void init(HardwareMap hm) {
+  
+    public void init(RobotHardware r) {
         telemetry.addData("Status", "Initialized");
-        hardwareMap = hm;
-        motor = hardwareMap.get(DcMotor.class, "liftmotor");
+        robotHardware = r;
+        motor = robotHardware.lift;
         motor.setDirection(DcMotor.Direction.REVERSE);
     }
 

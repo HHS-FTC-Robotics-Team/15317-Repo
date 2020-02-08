@@ -3,19 +3,20 @@
 package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
+import com.qualcomm.robotcore.robot.Robot;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
 import com.qualcomm.robotcore.hardware.HardwareMap;
-
+import org.firstinspires.ftc.teamcode.RobotHardware;
 
 public class OurState extends OpMode
 {
     //public HardwareMap hardwareMap = null;
     public Boolean running = true;
-    public HardwareMap hardwareMap = null;
+    public RobotHardware robotHardware = null;
     //@Override
     public OurState() {
         //hardwareMap = hm;
@@ -26,9 +27,9 @@ public class OurState extends OpMode
         
     }
     
-    public void init(HardwareMap hm) {
+    public void init(RobotHardware r) {
         telemetry.addData("Status", "Initialized");
-        hardwareMap = hm;
+        robotHardware = r;
     }
 
     @Override

@@ -32,6 +32,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import org.firstinspires.ftc.teamcode.Drive;
 import org.firstinspires.ftc.teamcode.Collect;
 import org.firstinspires.ftc.teamcode.OurState;
+import org.firstinspires.ftc.teamcode.RobotHardware;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -53,24 +54,15 @@ public class CollectUntilDist extends OurState {
     public Collect c = null;
     public Drive d = null;
     public DistanceSensor dist = null;
+    public RobotHardware robotHardware = null;
     public CollectUntilDist(){
         super ();
     }
-    @Override
-    public void init(HardwareMap hm) {
-        hardwareMap = hm;
-        c = new Collect(
-          hardwareMap.get(DcMotor.class, "col_left"),
-          hardwareMap.get(DcMotor.class, "col_right"),
-          hardwareMap.get(Rev2mDistanceSensor.class, "distance_sensor")
-        );
-        d = new Drive(
-            hardwareMap.get(DcMotor.class, "rbmotor"),
-            hardwareMap.get(DcMotor.class, "rfmotor"),
-            hardwareMap.get(DcMotor.class, "lfmotor"),
-            hardwareMap.get(DcMotor.class, "lbmotor")
-            );
-        telemetry.addData("Status", "Initialized");
+    
+    public void init(RobotHardware r) {
+        robotHardware = r;
+        c = robotHardware.c;
+        d = robotHardware.d;
         
         c.in(); //starts on init, so dont make collection first
         d.setPower(-1, 0, 0, 0.3);

@@ -15,7 +15,7 @@ public class Claw extends LinearOpMode {
   //these positions, between 0 and 1, were determined through testing
   private double max_left_pos = 0.4;
   private double min_left_pos = 0.25;
-  private double max_right_pos = .5;
+  private double max_right_pos = .58;
   private double min_right_pos = .65;
   
   // private double max_left_pos = 0;

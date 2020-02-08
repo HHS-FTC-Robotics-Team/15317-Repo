@@ -29,6 +29,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import org.firstinspires.ftc.teamcode.Drive;
 import com.qualcomm.robotcore.hardware.ColorSensor;
 import android.graphics.Color;
+import org.firstinspires.ftc.teamcode.RobotHardware;
 
 
 import java.text.SimpleDateFormat;
@@ -49,6 +50,7 @@ import java.util.Date;
 public class SeekUntilColor extends OurState {
     /* Declare OpMode members. */
     public Drive d = null;
+    public RobotHardware robotHardware = null;
     //colorsensor
     public ColorSensor color = null;
     float hsvValues[] = {0F,0F,0F};
@@ -58,17 +60,11 @@ public class SeekUntilColor extends OurState {
       
     }
     
-    @Override
-    public void init(HardwareMap hm) {
-      hardwareMap = hm;
-      d = new Drive(
-          hardwareMap.get(DcMotor.class, "rbmotor"),
-          hardwareMap.get(DcMotor.class, "rfmotor"),
-          hardwareMap.get(DcMotor.class, "lfmotor"),
-          hardwareMap.get(DcMotor.class, "lbmotor")
-      );
-      d.resetEncoderlf();
-      color = hardwareMap.get(ColorSensor.class, "colorsensor");
+    
+    public void init(RobotHardware r) {
+      robotHardware = r;
+      d = robotHardware.d;
+      color = robotHardware.color;
     }
 
     /*

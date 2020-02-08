@@ -8,7 +8,7 @@ import com.qualcomm.robotcore.hardware.Servo;
 public class Flick extends LinearOpMode {
 
   private Servo servo = null;
-  private double max = .1; // Maximum rotational position
+  private double max = .5; // Maximum rotational position, NOT USED, overridden by servo "chain" in teleop
   private double min = .8; // Minimum rotational position
 
   public Flick (Servo s) {
@@ -23,8 +23,8 @@ public class Flick extends LinearOpMode {
   }
   
   public void setPos(double goal) {
-    double error = 0.05;
-    double increment = 0.07;
+    double error = 0.09;
+    double increment = 0.06;
     double pos1 = servo.getPosition();
     if (pos1 > goal) {
       pos1 -= increment;

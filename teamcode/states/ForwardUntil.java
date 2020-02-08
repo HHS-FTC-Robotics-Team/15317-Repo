@@ -19,6 +19,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SO
 package org.firstinspires.ftc.teamcode.states;
 
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
+import com.qualcomm.robotcore.robot.Robot;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 //import com.qualcomm.robotcore.util.Hardware;
 //import com.qualcomm.robotcore.util.Hardware;
@@ -33,6 +34,7 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import org.firstinspires.ftc.teamcode.Drive;
 import org.firstinspires.ftc.teamcode.OurState;
+import org.firstinspires.ftc.teamcode.RobotHardware;
 //import com.qualcomm.robotcore.hardware.HardwareMap;
 
 
@@ -53,6 +55,7 @@ import java.util.Date;
 public class ForwardUntil extends OurState {
     /* Declare OpMode members. */
     public Drive d = null;
+    public RobotHardware robotHardware = null;
     //public Boolean running = true;
     public double goal = 0;
     private static double ACCURACY = 100;
@@ -64,16 +67,11 @@ public class ForwardUntil extends OurState {
         
     }
 
-    @Override
-    public void init(HardwareMap hm) {
+   
+    public void init(RobotHardware r) {
         telemetry.addData("Status", "Initialized");
-        hardwareMap = hm;
-        d = new Drive(
-          hardwareMap.get(DcMotor.class, "rbmotor"),
-          hardwareMap.get(DcMotor.class, "rfmotor"),
-          hardwareMap.get(DcMotor.class, "lfmotor"),
-          hardwareMap.get(DcMotor.class, "lbmotor")
-        );
+        robotHardware = r;
+        d = robotHardware.d;
         d.resetEncoderlf();
         
     }

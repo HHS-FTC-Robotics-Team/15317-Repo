@@ -35,6 +35,7 @@ import org.firstinspires.ftc.teamcode.states.DispenseUntilDist;
 import org.firstinspires.ftc.teamcode.states.SeekUntilColor;
 import org.firstinspires.ftc.teamcode.states.GrabFoundation;
 import org.firstinspires.ftc.teamcode.states.DragFoundationR;
+import org.firstinspires.ftc.teamcode.RobotHardware;
 
 
 import java.text.SimpleDateFormat;
@@ -64,9 +65,9 @@ public class LinearStack extends OurState {
     private int count = 0;
     
 
-    @Override
-    public void init(HardwareMap hm) {
-        hardwareMap = hm;
+   
+    public void init(RobotHardware r) {
+        robotHardware = r;
         // telemetry.addData("Status", "Initialized");
         // You can't call hardwareMap outside of init(), so create the states
         // inside init() (or load hardware in state.init())
@@ -95,7 +96,7 @@ public class LinearStack extends OurState {
             
         // };
         //turn = //new Turn(hardwareMap);
-        states[count].init(hardwareMap);
+        states[count].init(robotHardware);
 
     }
 
@@ -130,7 +131,8 @@ public class LinearStack extends OurState {
             //go to next state and input the last state's output
             double tempvariable = states[count].getVariable();
             count += 1;
-            states[count].init(hardwareMap);
+            robotHardware.reset();
+            states[count].init(robotHardware);
             states[count].addToGoal(tempvariable);
         } else {
             running = false;
